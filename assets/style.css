@@ -1,0 +1,29 @@
+DIV.slide {
+    margin-left: 5vw;
+    margin-top: 2vh;
+    width: 90vw;
+    height: 90vh;
+    font-size: 16pt;
+}
+
+DIV.slide H1, H2,H3 {
+    padding-top: 0px;
+    margin-top: 0px;
+    font-family: sans-serif;
+    color : #005a32;
+}
+
+
+DIV.slide IMG {
+    max-height: 80vh;
+    margin: 0px auto;
+}
+
+DIV#footer {
+    clear: both;
+    border-top: 4px black solid;
+    padding-top: 4px;
+    padding-left: 2em;
+    padding-bottom: 2px;
+}
+

@@ -26,7 +26,7 @@ import Json.Decode exposing (Decoder)
 import Markdown
 
 
-import Slides exposing (Slide, SlideShow, slides)
+import Slides exposing (Slide, SlideType(..), SlideShow, slides)
 
 type alias SlidePosition = Int
 
@@ -118,35 +118,48 @@ view model =
     in { title = "Microbes & antimicrobes"
         , body = [
             header,
-            active,
+            active.content,
             footer model]
         }
 
 
 header : Html Msg
 header =
-    Grid.simpleRow
-        [
+    node "link"
+        [ HtmlAttr.rel "stylesheet"
+        , HtmlAttr.href "/assets/style.css"
         ]
+        []
 
 
 footer : Model -> Html Msg
-footer (Showing cur) =
+footer (Showing pos) =
     let
-        total = List.length slides
+        countFirst sl =
+            sl
+            |> List.filter (\s -> s.slideType == FirstSlideInGroup)
+            |> List.length
+        cur = countFirst (List.take (pos+1) slides)
+        total = countFirst slides
     in
         Html.div
-            [HtmlAttr.class "footer"]
-            [Html.text "Microbes and antimicrobes of the global microbiome ("
-            ,Html.text (String.fromInt (cur+1))
-            ,Html.text "/"
-            ,Html.text (String.fromInt total)
-            ,Html.text ")"
+            [HtmlAttr.id "footer"]
+            [Html.p []
+                [Html.strong [HtmlAttr.style "padding-right" "20em"]
+                    [Html.text "Luis Pedro Coelho"]
+                ,Html.text "Microbes and antimicrobes of the global microbiome ("
+                ,Html.text (String.fromInt cur)
+                ,Html.text "/"
+                ,Html.text (String.fromInt total)
+                ,Html.text ")"
+                ]
             ]
 
 
 slideErr : Slide msg
-slideErr = Html.h1 [] [Html.text "internal error"]
+slideErr =
+    { content = Html.h1 [] [Html.text "internal error"]
+    , slideType = FirstSlideInGroup }
 
 
 markdownOptions =

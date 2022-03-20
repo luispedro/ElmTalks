@@ -1,18 +1,4 @@
-module Slides exposing (Slide, SlideShow, slides)
-
-import Bootstrap.Alert as Alert
-import Bootstrap.Button as Button
-import Bootstrap.CDN as CDN
-import Bootstrap.Form as Form
-import Bootstrap.Form.Checkbox as Checkbox
-import Bootstrap.Form.Textarea as Textarea
-import Bootstrap.Grid as Grid
-import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
-import Bootstrap.Popover as Popover
-import Bootstrap.Text as Text
-import Bootstrap.Table as Table
-import Bootstrap.Spinner as Spinner
+module Slides exposing (Slide, SlideType(..), SlideShow, slides)
 
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
@@ -25,22 +11,35 @@ import Json.Decode exposing (Decoder)
 
 import Markdown
 
-type alias Slide msg = Html msg
+type SlideType = FirstSlideInGroup | Follower
+
+type alias Slide msg =
+    { content : Html msg
+    , slideType : SlideType
+    }
 type alias SlideShow msg = List (Slide msg)
 
 
 mkSlide : String -> List (Html msg) -> Slide msg
 mkSlide title body =
-    Html.div
+    { content = Html.div
         [HtmlAttr.class "slide"]
         (Html.h2 [] [Html.text title] :: body)
+    , slideType = FirstSlideInGroup
+    }
 
+
+tagSlideGroup : List (Slide msg) -> List (Slide msg)
+tagSlideGroup sl = case sl of
+    [] -> []
+    (h :: rest) -> h :: List.map (\s -> { s | slideType = Follower }) rest
 
 mkIncrementalSlide : String -> List (List (Html msg)) -> List (Slide msg)
 mkIncrementalSlide title parts =
-    List.map (\ix ->
-        mkSlide title (List.concat (List.take ix parts)))
-        <| List.range 0 (List.length parts)
+    List.range 1 (List.length parts)
+    |> List.map (\ix ->
+            mkSlide title (List.concat (List.take ix parts)))
+    |> tagSlideGroup
 
 markdownOptions =
     { githubFlavored = Just { tables = True, breaks = False }
@@ -51,10 +50,13 @@ markdownOptions =
 mdToHtml = Markdown.toHtmlWith markdownOptions []
 
 img80 src =
-    Html.img
-        [HtmlAttr.src src
-        ,HtmlAttr.style "width" "80%"]
-        []
+    Html.div
+        [HtmlAttr.style "text-align" "center"]
+        [Html.img
+            [HtmlAttr.src src
+            ,HtmlAttr.style "width" "80%"]
+            []
+        ]
 
 p t = Html.p [] [Html.text t]
 
@@ -65,10 +67,10 @@ p t = Html.p [] [Html.text t]
 
 
 
-
-
 slides = List.concat
-    [gmgcv1slides
+    [
+    intro
+    ,gmgcv1slides
     ,newFamiliesSlides
     ,semiBin
     ,gmgcv2
@@ -76,12 +78,23 @@ slides = List.concat
     ]
 
 
+intro =
+    [{ content = Html.div [HtmlAttr.class "slide"]
+        [Html.h1 []
+            [Html.text "Microbes & antimicrobes"]
+        ,Html.h2 []
+            [Html.text "Luis Pedro Coelho"]
+        ]
+     ,slideType = FirstSlideInGroup }
+    ,mkSlide "BDB-Lab (Big Data Biology Lab) high-level overview"
+        [img80 "Media/BigDataBiology/BDB-Lab_structure.svg"]
+    ]
+
+
 gmgcv1slides =
     [
         mkSlide "The global microbiome"
-            [Html.img [HtmlAttr.src "/Media/GMGC/Fig1a-layered.svg"
-                      ,HtmlAttr.style "height" "800px"]
-                      []
+            [img80 "/Media/GMGC/Fig1a-layered.svg"
             ,Html.p [HtmlAttr.style "padding-top" "0em"]
                     [Html.text "Coelho "
                     ,Html.em [] [Html.text "et al."]
@@ -97,15 +110,15 @@ gmgcv1slides =
     <a href="https://dx.plos.org/10.1371/journal.pone.0101021" class="citation">Deusch et al., PlOS One, 2014</a>;
     <a href="https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0144881" class="citation">Deusch et al., PlOS One, 2015</a>
     )
-- <li>Marine environment (130 samples, <a href="" class="citation">Sunagawa, Coelho, Chaffon et al., 2015</a>)
+- Marine environment (130 samples, <a href="" class="citation">Sunagawa, Coelho, Chaffon et al., 2015</a>)
 - Built-environment (1295 samples, <a href="" class="citation">MetaSUB consortium</a>)
 - ...
 
 Reworked data from scratch _using a consistent methodology_
 """]
         ,mkSlide "We also have 46,655 MAGs, but they miss many genes"
-            [mdToHtml """
-<img src="/Media/GMGC/Bork_EDfig4.png" style="height: 800px" />
+            [img80 "/Media/GMGC/Bork_EDfig4.png"
+            ,mdToHtml """
 
 - This is including the 75,674 <em>medium-quality</em> bins (for a total of 122k high- or medium-quality bins)
 """]
@@ -131,7 +144,7 @@ Reworked data from scratch _using a consistent methodology_
             ]
 
         ,mkSlide "The environmental patterns are a mixture of subpatterns"
-            [img80 "/Media/GMGC/SupplFigure9-all-habitats-mobility.svg"
+            [img80 "/Media/GMGC/Habitat-subpatterns-horizontal.svg"
             ,p "Environmental samples are a mixture of sub-habitats"
             ]
         ,mkSlide "Most of these genes belong to a small number of gene families"
@@ -258,20 +271,25 @@ ampSlides = List.concat
 
 ampCatalogBuild : List (Slide msg)
 ampCatalogBuild =
-    List.map (\ix ->
-        mkSlide "Building a catalog of AMPs"
-        [img80 (String.concat
-                    ["/Media/AMPsphere/creation/frame"
-                    ,String.fromInt ix
-                    ,".png"])
-        ,p "We are applying the same general approach as GMGC: process all (meta)genomes with a consistent methodology"
-        ]) (List.range 0 9)
+    List.range 0 9
+    |> List.map (\ix ->
+            mkSlide "Building a catalog of AMPs"
+                [img80 (String.concat
+                            ["/Media/AMPsphere/creation/frame"
+                            ,String.fromInt ix
+                            ,".png"])
+                ,p "We are applying the same general approach as GMGC: process all (meta)genomes with a consistent methodology"
+                ])
+    |> tagSlideGroup
 
 
 semiBin : List (Slide msg)
 semiBin =
     [mkSlide "SemiBin: using deep learning outperforms state-of-the-art"
-        [img80 "/Media/SemiBin/Fig3b.svg"
+        [Html.img
+            [HtmlAttr.src "/Media/SemiBin/Fig3b.svg"
+            ,HtmlAttr.style "height" "80%"
+            ] []
         ,personImage "Shaojun Pan" "/Media/BigDataBiology/people/ShaojunPan.jpg"
         ]
     ,mkSlide "SemiBin works across many habitats"
