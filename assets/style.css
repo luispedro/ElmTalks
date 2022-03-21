@@ -2,10 +2,13 @@ DIV.slide {
     margin-left: 5vw;
     margin-top: 2vh;
     width: 90vw;
-    height: 90vh;
+    height: 92vh;
     font-size: 16pt;
 }
 
+DIV.slide H1 {
+    font-variant: small-caps;
+}
 DIV.slide H1, H2,H3 {
     padding-top: 0px;
     margin-top: 0px;
@@ -15,15 +18,17 @@ DIV.slide H1, H2,H3 {
 
 
 DIV.slide IMG {
-    max-height: 80vh;
+    max-height: 75vh;
     margin: 0px auto;
 }
 
 DIV#footer {
     clear: both;
-    border-top: 4px black solid;
-    padding-top: 4px;
+    border-top: 1px solid #005a32;
+    margin-top: 0px;
+    padding-top: 2px;
     padding-left: 2em;
-    padding-bottom: 2px;
+    padding-bottom: 0px;
+    font-family: sans-serif;
 }
 

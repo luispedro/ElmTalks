@@ -145,13 +145,13 @@ footer (Showing pos) =
         Html.div
             [HtmlAttr.id "footer"]
             [Html.p []
-                [Html.strong [HtmlAttr.style "padding-right" "20em"]
+                [Html.strong [HtmlAttr.style "padding-right" "42em"]
                     [Html.text "Luis Pedro Coelho"]
-                ,Html.text "Microbes and antimicrobes of the global microbiome ("
+                ,Html.text "Microbes and antimicrobes ["
                 ,Html.text (String.fromInt cur)
                 ,Html.text "/"
                 ,Html.text (String.fromInt total)
-                ,Html.text ")"
+                ,Html.text "]"
                 ]
             ]
 
