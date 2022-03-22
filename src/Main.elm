@@ -34,6 +34,7 @@ type Model = Showing SlidePosition
 
 type Msg
     = NoMsg
+    | GotoSlide Int
     | NextSlide
     | PreviousSlide
     | LastSlide
@@ -45,7 +46,7 @@ main =
     Browser.document
         { init = init
         , view = view
-        , update = update
+        , update = update slides
         , subscriptions = \_ -> Browser.Events.onKeyUp handleKeys
         }
 
@@ -65,7 +66,7 @@ handleKeys =
                     (h :: _) -> h
                     _ -> '?'
             in
-                if List.member k (String.toList "nNjJ")
+                if List.member k (String.toList " nNjJ")
                 then Json.Decode.succeed NextSlide
                 else if List.member k (String.toList "pPkK")
                 then Json.Decode.succeed PreviousSlide
@@ -73,15 +74,50 @@ handleKeys =
                 then Json.Decode.succeed FirstSlide
                 else if List.member k (String.toList "lL")
                 then Json.Decode.succeed LastSlide
+                else if k == '0'
+                then Json.Decode.succeed (GotoSlide 0)
+                else if k == '1'
+                then Json.Decode.succeed (GotoSlide 5)
+                else if k == '2'
+                then Json.Decode.succeed (GotoSlide 10)
+                else if k == '3'
+                then Json.Decode.succeed (GotoSlide 15)
+                else if k == '4'
+                then Json.Decode.succeed (GotoSlide 20)
+                else if k == '5'
+                then Json.Decode.succeed (GotoSlide 25)
+                else if k == '6'
+                then Json.Decode.succeed (GotoSlide 30)
+                else if k == '7'
+                then Json.Decode.succeed (GotoSlide 35)
+                else if k == '8'
+                then Json.Decode.succeed (GotoSlide 40)
+                else if k == '9'
+                then Json.Decode.succeed (GotoSlide 45)
                 else Json.Decode.fail ""
         )
 
 
+findIx slides ix =
+    case slides of
+        [] -> 0
+        (f::rest) ->
+            if f.slideType == FirstSlideInGroup
+            then
+                if ix == 0
+                then 0
+                else 1 + (findIx rest (ix - 1))
+            else 1 + findIx rest ix
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model = case msg of
+update : List (Slide Msg) -> Msg -> Model -> ( Model, Cmd Msg )
+update slides msg model = case msg of
         NoMsg ->
             ( model, Cmd.none )
+        GotoSlide ix ->
+            let
+                real_ix = findIx slides (ix - 1)
+                n = List.length slides
+            in ( Showing (if real_ix < n then real_ix else n - 1), Cmd.none )
         NextSlide ->
             ( advance1 model, Cmd.none )
         PreviousSlide ->
