@@ -110,11 +110,11 @@ intro =
             ,Html.text "@luispedrocoelho"]
             ,Html.p [ HtmlAttr.style "text-align" "right"
                     , HtmlAttr.style "padding-top" "9em" ]
-                    [ Html.img [ HtmlAttr.src "Media/ISTBI-logo.png"
+                    [ Html.img [ HtmlAttr.src "/Media/ISTBI-logo.png"
                                 , HtmlAttr.style "width" "66%"
                                 , HtmlAttr.style "padding-right" "4em" ]
                         []
-                    , Html.img [ HtmlAttr.src "Media/Fudan-logo.png", HtmlAttr.style "width" "18%" ]
+                    , Html.img [ HtmlAttr.src "/Media/Fudan-logo.png", HtmlAttr.style "width" "18%" ]
                         []
                     ]
         ]
@@ -195,7 +195,9 @@ This includes 75,674 <em>medium-quality</em> bins (for a total of 122k high- or 
                 ,Html.li [] [Html.text " Increased selection for more prevalent genes"]]
             ]
         ,mkSlide "GMGC as a resource"
-            [img80 "/Media/GMGC/GMGC_EMBL_DE_search.png"
+            [Html.div
+                [HtmlAttr.style "text-align" "center"]
+                [Html.img [HtmlAttr.src "/Media/GMGC/GMGC_EMBL_DE_search.png"] []]
             ,mdToHtml "[https://gmgc.embl.de/](https://gmgc.embl.de/)"
             ]
     ]
