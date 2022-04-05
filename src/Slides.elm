@@ -297,7 +297,7 @@ ampSlides =
         [img80 "/Media/GMSC/GMSC_qc.svg"
         ,p "We are currently exploring this resource"]
     ,mkSlide "The AMPSphere: almost one million AMP candidates"
-        [img80 "/Media/AMPsphere/Fig1.png"]
+        [img80 "/Media/AMPsphere/Figure1.svg"]
     ]
 
 buildGMGCv2 : List (Slide msg)
