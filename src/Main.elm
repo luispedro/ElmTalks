@@ -60,39 +60,34 @@ handleKeys : Decoder Msg
 handleKeys =
     Json.Decode.string
         |> Json.Decode.field "key"
-        |> Json.Decode.andThen (\ks ->
-            let
-                k = case String.toList ks of
-                    (h :: _) -> h
-                    _ -> '?'
-            in
-                if List.member k (String.toList " nNjJ")
+        |> Json.Decode.andThen (\k ->
+                if List.member k [" ", "n", "N", "j", "J", "ArrowLeft"]
                 then Json.Decode.succeed NextSlide
-                else if List.member k (String.toList "pPkK")
+                else if List.member k ["p", "P", "k", "K", "ArrowRight"]
                 then Json.Decode.succeed PreviousSlide
-                else if List.member k (String.toList "fFhH")
+                else if List.member k ["f", "F", "h", "H"]
                 then Json.Decode.succeed FirstSlide
-                else if List.member k (String.toList "lL")
+                else if List.member k ["l", "L"]
                 then Json.Decode.succeed LastSlide
-                else if k == '0'
+                else if k == "0"
                 then Json.Decode.succeed (GotoSlide 0)
-                else if k == '1'
+                else if k == "1"
                 then Json.Decode.succeed (GotoSlide 5)
-                else if k == '2'
+                else if k == "2"
                 then Json.Decode.succeed (GotoSlide 10)
-                else if k == '3'
+                else if k == "3"
                 then Json.Decode.succeed (GotoSlide 15)
-                else if k == '4'
+                else if k == "4"
                 then Json.Decode.succeed (GotoSlide 20)
-                else if k == '5'
+                else if k == "5"
                 then Json.Decode.succeed (GotoSlide 25)
-                else if k == '6'
+                else if k == "6"
                 then Json.Decode.succeed (GotoSlide 30)
-                else if k == '7'
+                else if k == "7"
                 then Json.Decode.succeed (GotoSlide 35)
-                else if k == '8'
+                else if k == "8"
                 then Json.Decode.succeed (GotoSlide 40)
-                else if k == '9'
+                else if k == "9"
                 then Json.Decode.succeed (GotoSlide 45)
                 else Json.Decode.fail ""
         )
