@@ -26,7 +26,8 @@ import Json.Decode exposing (Decoder)
 import Markdown
 
 
-import Slides exposing (Slide, SlideType(..), SlideShow, slides)
+import Slides exposing (Slide, SlideType(..), SlideShow)
+import Content exposing (slides)
 
 type alias SlidePosition = Int
 
