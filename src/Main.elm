@@ -110,8 +110,9 @@ handleKeys =
         )
 
 
+position2slideN : List (Slide Msg) -> Int -> Int
 position2slideN slides p =
-    List.take p slides
+    List.take (p+1) slides
         |> List.filter (\s -> s.slideType == FirstSlideInGroup)
         |> List.length
 
@@ -145,7 +146,7 @@ update slides msg model = case msg of
                     else if p >= n
                     then n - 1
                     else p
-                slide_n = 1 + position2slideN slides real_p
+                slide_n = position2slideN slides real_p
                 m = Nav.replaceUrl model.key ("#"++String.fromInt slide_n)
             in ( {model | position = real_p}, m)
         NextSlide ->
