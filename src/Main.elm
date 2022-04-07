@@ -30,8 +30,9 @@ import Markdown
 import Slides exposing (Slide, SlideType(..), SlideShow)
 import Content exposing (slides)
 
-{- The term `position` will refer to the internal counter and the term `slide number`
- - will be the human readable version
+{- The term `position` will refer to the internal counter (zero-based, indexes
+ - into the slides list) and the term `slide number` will be the human readable
+ - version (one-based, counts by groups)
  -}
 
 type alias Model =
@@ -66,17 +67,11 @@ init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init () u k =
     let
         islide = case u.fragment of
-           Nothing -> 0
+           Nothing -> 1
            Just f -> case String.toInt f of
                 Just s -> s
-                Nothing -> 0
-        imodel = case update slides (GotoSlideNumber islide) { position = 0, key = k } of
-            (m , _ ) -> m
-
-    in
-        ( imodel
-        , Cmd.none
-        )
+                Nothing -> 1
+    in update slides (GotoSlideNumber islide) { position = 0, key = k }
 
 handleKeys : Decoder Msg
 handleKeys =
