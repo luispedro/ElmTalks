@@ -62,9 +62,9 @@ handleKeys =
     Json.Decode.string
         |> Json.Decode.field "key"
         |> Json.Decode.andThen (\k ->
-                if List.member k [" ", "n", "N", "j", "J", "ArrowLeft"]
+                if List.member k [" ", "n", "N", "j", "J", "ArrowRight"]
                 then Json.Decode.succeed NextSlide
-                else if List.member k ["p", "P", "k", "K", "ArrowRight"]
+                else if List.member k ["p", "P", "k", "K", "ArrowLeft"]
                 then Json.Decode.succeed PreviousSlide
                 else if List.member k ["f", "F", "h", "H"]
                 then Json.Decode.succeed FirstSlide
