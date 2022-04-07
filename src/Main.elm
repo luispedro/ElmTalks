@@ -194,11 +194,3 @@ slideErr =
     , slideType = FirstSlideInGroup }
 
 
-markdownOptions =
-    { githubFlavored = Just { tables = True, breaks = False }
-    , defaultHighlighting = Nothing
-    , sanitize = False
-    , smartypants = False
-    }
-mdToHtml = Markdown.toHtmlWith markdownOptions []
-
