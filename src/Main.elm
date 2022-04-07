@@ -21,6 +21,7 @@ import Html.Events exposing (..)
 import Browser
 import Browser.Events
 import Browser.Navigation as Nav
+import Url
 import Json.Decode exposing (Decoder)
 
 import Markdown
@@ -29,13 +30,21 @@ import Markdown
 import Slides exposing (Slide, SlideType(..), SlideShow)
 import Content exposing (slides)
 
-type alias SlidePosition = Int
+{- The term `position` will refer to the internal counter and the term `slide number`
+ - will be the human readable version
+ -}
 
-type Model = Showing SlidePosition
+type alias Model =
+    { position : Int
+    , key : Nav.Key
+    }
+
 
 type Msg
     = NoMsg
-    | GotoSlide Int
+    | NavTo String
+    | GotoSlideNumber Int
+    | GotoPosition Int
     | NextSlide
     | PreviousSlide
     | LastSlide
@@ -44,18 +53,30 @@ type Msg
 
 main : Program () Model Msg
 main =
-    Browser.document
+    Browser.application
         { init = init
         , view = view
         , update = update slides
         , subscriptions = \_ -> Browser.Events.onKeyUp handleKeys
+        , onUrlRequest = onUrlRequest
+        , onUrlChange = onUrlChange
         }
 
-init : () -> ( Model, Cmd Msg )
-init () =
-    ( Showing 0
-    , Cmd.none
-    )
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init () u k =
+    let
+        islide = case u.fragment of
+           Nothing -> 0
+           Just f -> case String.toInt f of
+                Just s -> s
+                Nothing -> 0
+        imodel = case update slides (GotoSlideNumber islide) { position = 0, key = k } of
+            (m , _ ) -> m
+
+    in
+        ( imodel
+        , Cmd.none
+        )
 
 handleKeys : Decoder Msg
 handleKeys =
@@ -71,28 +92,33 @@ handleKeys =
                 else if List.member k ["l", "L"]
                 then Json.Decode.succeed LastSlide
                 else if k == "0"
-                then Json.Decode.succeed (GotoSlide 0)
+                then Json.Decode.succeed (GotoSlideNumber 0)
                 else if k == "1"
-                then Json.Decode.succeed (GotoSlide 5)
+                then Json.Decode.succeed (GotoSlideNumber 5)
                 else if k == "2"
-                then Json.Decode.succeed (GotoSlide 10)
+                then Json.Decode.succeed (GotoSlideNumber 10)
                 else if k == "3"
-                then Json.Decode.succeed (GotoSlide 15)
+                then Json.Decode.succeed (GotoSlideNumber 15)
                 else if k == "4"
-                then Json.Decode.succeed (GotoSlide 20)
+                then Json.Decode.succeed (GotoSlideNumber 20)
                 else if k == "5"
-                then Json.Decode.succeed (GotoSlide 25)
+                then Json.Decode.succeed (GotoSlideNumber 25)
                 else if k == "6"
-                then Json.Decode.succeed (GotoSlide 30)
+                then Json.Decode.succeed (GotoSlideNumber 30)
                 else if k == "7"
-                then Json.Decode.succeed (GotoSlide 35)
+                then Json.Decode.succeed (GotoSlideNumber 35)
                 else if k == "8"
-                then Json.Decode.succeed (GotoSlide 40)
+                then Json.Decode.succeed (GotoSlideNumber 40)
                 else if k == "9"
-                then Json.Decode.succeed (GotoSlide 45)
+                then Json.Decode.succeed (GotoSlideNumber 45)
                 else Json.Decode.fail ""
         )
 
+
+position2slideN slides p =
+    List.take p slides
+        |> List.filter (\s -> s.slideType == FirstSlideInGroup)
+        |> List.length
 
 findIx slides ix =
     case slides of
@@ -109,44 +135,58 @@ update : List (Slide Msg) -> Msg -> Model -> ( Model, Cmd Msg )
 update slides msg model = case msg of
         NoMsg ->
             ( model, Cmd.none )
-        GotoSlide ix ->
+        NavTo s ->
+            ( model, Nav.load s )
+        GotoSlideNumber ix ->
             let
                 real_ix = findIx slides (ix - 1)
+            in update slides (GotoPosition real_ix) model
+        GotoPosition p ->
+            let
                 n = List.length slides
-            in ( Showing (if real_ix < n then real_ix else n - 1), Cmd.none )
+                real_p =
+                    if p < 0
+                    then 0
+                    else if p >= n
+                    then n - 1
+                    else p
+                slide_n = 1 + position2slideN slides real_p
+                m = Nav.replaceUrl model.key ("#"++String.fromInt slide_n)
+            in ( {model | position = real_p}, m)
         NextSlide ->
-            ( advance1 model, Cmd.none )
+            update slides (GotoPosition <| advance1 model) model
         PreviousSlide ->
-            ( previous1 model, Cmd.none )
+            update slides (GotoPosition <| previous1 model) model
         LastSlide ->
-            (Showing (List.length slides - 1), Cmd.none)
+            update slides (GotoPosition (List.length slides - 1)) model
         FirstSlide ->
-            (Showing 0, Cmd.none)
+            update slides (GotoPosition 0) model
 
-advance1 : Model -> Model
-advance1 (Showing n) =
-    if n + 1 >= List.length slides
-    then Showing n
-    else Showing (n+1)
+advance1 : Model -> Int
+advance1 model =
+    let n = model.position in
+        if n + 1 >= List.length slides
+            then n
+            else n+1
 
-previous1 : Model -> Model
-previous1 (Showing n) =
-    if n > 0
-    then Showing (n-1)
-    else Showing n
+previous1 : Model -> Int
+previous1 model =
+    if model.position > 0
+    then model.position - 1
+    else 0
 
-getSlide : Model -> SlideShow msg -> Slide msg
-getSlide (Showing n) sl = case sl of
+getSlide : Int -> SlideShow msg -> Slide msg
+getSlide n sl = case sl of
     (h :: rest) ->
         if n == 0
         then h
-        else getSlide (Showing (n-1)) rest
+        else getSlide (n-1) rest
     _ -> slideErr
 
 view model =
     let
         active : Slide msg
-        active = getSlide model slides
+        active = getSlide model.position slides
     in { title = "Microbes & antimicrobes"
         , body = [
             header,
@@ -165,13 +205,13 @@ header =
 
 
 footer : Model -> Html Msg
-footer (Showing pos) =
+footer model =
     let
         countFirst sl =
             sl
             |> List.filter (\s -> s.slideType == FirstSlideInGroup)
             |> List.length
-        cur = countFirst (List.take (pos+1) slides)
+        cur = countFirst (List.take (model.position+1) slides)
         total = countFirst slides
     in
         Html.div
@@ -192,5 +232,13 @@ slideErr : Slide msg
 slideErr =
     { content = Html.h1 [] [Html.text "internal error"]
     , slideType = FirstSlideInGroup }
+
+onUrlRequest : Browser.UrlRequest -> Msg
+onUrlRequest urlR = case urlR of
+    Browser.External s -> NavTo s
+    Browser.Internal u -> NavTo (Url.toString u)
+
+onUrlChange : Url.Url -> Msg
+onUrlChange u = NoMsg
 
 
