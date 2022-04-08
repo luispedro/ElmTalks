@@ -87,7 +87,7 @@ handleKeys =
                 else if List.member k ["l", "L"]
                 then Json.Decode.succeed LastSlide
                 else if k == "0"
-                then Json.Decode.succeed (GotoSlideNumber 0)
+                then Json.Decode.succeed (GotoSlideNumber 1)
                 else if k == "1"
                 then Json.Decode.succeed (GotoSlideNumber 5)
                 else if k == "2"
