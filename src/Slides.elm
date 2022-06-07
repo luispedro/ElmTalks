@@ -1,4 +1,4 @@
-module Slides exposing (Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, mdToHtml, img80, tagSlideGroup, p)
+module Slides exposing (Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, mdToHtml, img80, tagSlideGroup, mkSlideGroup, p)
 
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
@@ -37,6 +37,11 @@ tagSlideGroup : List (Slide msg) -> List (Slide msg)
 tagSlideGroup sl = case sl of
     [] -> []
     (h :: rest) -> h :: List.map (\s -> { s | slideType = Follower }) rest
+
+mkSlideGroup : String -> List (List (Html msg)) -> List (Slide msg)
+mkSlideGroup title parts =
+    List.map (mkSlide title) parts
+        |> tagSlideGroup
 
 mkIncrementalSlide : String -> List (List (Html msg)) -> List (Slide msg)
 mkIncrementalSlide title parts =
