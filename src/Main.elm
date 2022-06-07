@@ -183,7 +183,7 @@ view model =
     let
         active : Slide msg
         active = getSlide model.position slides
-    in { title = "Microproteins of the global microbiome"
+    in { title = "Exploring the microbiome at a global scale (GMGC & SemiBin)"
         , body = [
             header,
             active.content,
@@ -215,7 +215,7 @@ footer model =
             [Html.p []
                 [Html.strong [HtmlAttr.style "padding-right" "42em"]
                     [Html.text "Luis Pedro Coelho"]
-                ,Html.text "Microproteins in the global microbiome ["
+                ,Html.text "Exploring the global microbiome ["
                 ,Html.text (String.fromInt cur)
                 ,Html.text "/"
                 ,Html.text (String.fromInt total)
