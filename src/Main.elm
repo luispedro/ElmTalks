@@ -183,12 +183,17 @@ view model =
     let
         active : Slide msg
         active = getSlide model.position slides
-    in { title = "Exploring the microbiome at a global scale (GMGC & SemiBin)"
-        , body = [
-            header,
-            active.content,
-            footer model]
+    in
+    if active.slideType == Slides.Special
+        then { title = "Exploring the microbiome at a global scale (GMGC & SemiBin)"
+            , body = [ active.content ]
         }
+        else { title = "Exploring the microbiome at a global scale (GMGC & SemiBin)"
+            , body = [
+                header,
+                active.content,
+                footer model]
+            }
 
 
 header : Html Msg
@@ -217,8 +222,10 @@ footer model =
                     [Html.text "Luis Pedro Coelho"]
                 ,Html.text "Exploring the global microbiome ["
                 ,Html.text (String.fromInt cur)
+                {-
                 ,Html.text "/"
                 ,Html.text (String.fromInt total)
+                -}
                 ,Html.text "]"
                 ]
             ]

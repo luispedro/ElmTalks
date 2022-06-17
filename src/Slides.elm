@@ -15,7 +15,7 @@ import Json.Decode exposing (Decoder)
 
 import Markdown
 
-type SlideType = FirstSlideInGroup | Follower
+type SlideType = FirstSlideInGroup | Follower | Special
 
 type alias Slide msg =
     { content : Html msg
