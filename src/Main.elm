@@ -28,7 +28,7 @@ import Markdown
 
 
 import Slides exposing (Slide, SlideType(..), SlideShow)
-import Content exposing (slides)
+import Content exposing (slides, metadata)
 
 {- The term `position` will refer to the internal counter (zero-based, indexes
  - into the slides list) and the term `slide number` will be the human readable
@@ -185,10 +185,10 @@ view model =
         active = getSlide model.position slides
     in
     if active.slideType == Slides.Special
-        then { title = "Exploring the microbiome at a global scale (GMGC & SemiBin)"
+        then { title = metadata.title
             , body = [ active.content ]
         }
-        else { title = "Exploring the microbiome at a global scale (GMGC & SemiBin)"
+        else { title = metadata.title
             , body = [
                 header,
                 active.content,
@@ -220,7 +220,8 @@ footer model =
             [Html.p []
                 [Html.strong [HtmlAttr.style "padding-right" "42em"]
                     [Html.text "Luis Pedro Coelho"]
-                ,Html.text "Exploring the global microbiome ["
+                ,Html.text metadata.shortTitle
+                ,Html.text "["
                 ,Html.text (String.fromInt cur)
                 {-
                 ,Html.text "/"
