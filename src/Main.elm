@@ -191,8 +191,8 @@ view model =
         else { title = metadata.title
             , body = [
                 header,
-                active.content,
-                footer model]
+                active.content
+                ]
             }
 
 
