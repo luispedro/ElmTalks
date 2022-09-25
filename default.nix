@@ -36,7 +36,7 @@ let
       in ''
         ${lib.concatStrings (map (module: ''
           echo "compiling ${elmfile module}"
-          elm make ${elmfile module} --output $out/${module}.${extension}
+          elm make ${elmfile module} --optimize --output $out/${module}.${extension}
           ${lib.optionalString outputJavaScript ''
             echo "minifying ${elmfile module}"
             uglifyjs $out/${module}.${extension} --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' \
@@ -47,10 +47,13 @@ let
         cp -pir assets $out/
       '';
     };
+
 in mkDerivation {
   name = "lpc-slides";
   srcs = ./elm-srcs.nix;
-  src = ./.;
+  src = builtins.filterSource
+            (path: _type: baseNameOf path != ".git" && baseNameOf path != "result")
+            ./.;
   targets = ["Main"];
   srcdir = "./src";
   outputJavaScript = false;
