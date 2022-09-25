@@ -1,8 +1,12 @@
-{ nixpkgs ? <nixpkgs>
-, config ? {}
-}:
+let
+nixpkgs = builtins.fetchTarball {
+      name = "nixpks-unstable-2022-09";
+      url = "https://github.com/nixos/nixpkgs/archive/3d6636ba27ca348f3f110d8fa6c9d7ae1fce648a.tar.gz";
+      sha256 = "0dph11l5mgqlylhq86b0x3zg1n1vpy1j2f81b00l71j8qmwr3z8z";
+    };
+in
 
-with (import nixpkgs config);
+with (import nixpkgs {});
 
 let
   mkDerivation =
