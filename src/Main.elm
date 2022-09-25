@@ -186,12 +186,16 @@ view model =
     in
     if active.slideType == Slides.Special
         then { title = metadata.title
-            , body = [ active.content ]
+            , body = [ Html.div [HtmlAttr.id "main-content"] [ active.content ] ]
         }
         else { title = metadata.title
             , body = [
-                header,
-                active.content
+                Html.div
+                    [HtmlAttr.id "main-content"]
+                    [ header
+                    , active.content
+                    , footer model
+                    ]
                 ]
             }
 
