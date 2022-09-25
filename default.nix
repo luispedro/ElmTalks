@@ -40,10 +40,12 @@ let
                 | uglifyjs --mangle --output $out/${module}.min.${extension}
           ''}
         '') targets)}
+        cp -pir Media $out/
+        cp -pir assets $out/
       '';
     };
 in mkDerivation {
-  name = "elm-app-0.1.0";
+  name = "lpc-slides";
   srcs = ./elm-srcs.nix;
   src = ./.;
   targets = ["Main"];
