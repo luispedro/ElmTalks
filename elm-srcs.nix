@@ -40,6 +40,11 @@
         version = "1.0.0";
       };
 
+      "pablohirafuji/elm-syntax-highlight" = {
+        sha256 = "1bs1xhj1ncd98j4fb06rnhspgy4q1wfz1c85rc51lri0cgkwdabg";
+        version = "3.4.1";
+      };
+
       "rundis/elm-bootstrap" = {
         sha256 = "155rqa2hh9h5s0ryqv4pn40vwl2klk3zg8b2xf48z5ky8fdrr31c";
         version = "5.2.0";
