@@ -1,4 +1,4 @@
-module Slides exposing (Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, mdToHtml, tagSlideGroup, mkSlideGroup)
+module Slides exposing (RawSlide(..), Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, mdToHtml, tagSlideGroup, mkSteppedSlide, cookSlides)
 
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
@@ -23,9 +23,19 @@ type alias Slide msg =
     }
 type alias SlideShow msg = List (Slide msg)
 
+type RawSlide msg = RawSlide (Slide msg) | RawSlideGroup (List (Slide msg))
 
-mkSlide : String -> List (Html msg) -> Slide msg
-mkSlide title body =
+mkSlide : String -> List (Html msg) -> RawSlide msg
+mkSlide title body = RawSlide <|
+    { content = Html.div
+        [HtmlAttr.class "slide"]
+        (Html.h2 [] [Html.text title] :: body)
+    , slideType = FirstSlideInGroup
+    }
+
+
+mkSlideSimple : String -> List (Html msg) -> Slide msg
+mkSlideSimple title body =
     { content = Html.div
         [HtmlAttr.class "slide"]
         (Html.h2 [] [Html.text title] :: body)
@@ -38,17 +48,19 @@ tagSlideGroup sl = case sl of
     [] -> []
     (h :: rest) -> h :: List.map (\s -> { s | slideType = Follower }) rest
 
-mkSlideGroup : String -> List (List (Html msg)) -> List (Slide msg)
-mkSlideGroup title parts =
-    List.map (mkSlide title) parts
+mkSteppedSlide : String -> List (List (Html msg)) -> RawSlide msg
+mkSteppedSlide title parts =
+    List.map (mkSlideSimple title) parts
         |> tagSlideGroup
+        |> RawSlideGroup
 
-mkIncrementalSlide : String -> List (List (Html msg)) -> List (Slide msg)
+mkIncrementalSlide : String -> List (List (Html msg)) -> RawSlide msg
 mkIncrementalSlide title parts =
     List.range 1 (List.length parts)
     |> List.map (\ix ->
-            mkSlide title (List.concat (List.take ix parts)))
+            mkSlideSimple title (List.concat (List.take ix parts)))
     |> tagSlideGroup
+    |> RawSlideGroup
 
 markdownOptions =
     { githubFlavored = Just { tables = True, breaks = False }
@@ -58,6 +70,12 @@ markdownOptions =
     }
 mdToHtml = Markdown.toHtmlWith markdownOptions []
 
+cookSlides : List (RawSlide msg) -> List (Slide msg)
+cookSlides = List.concatMap cookSlide
 
+cookSlide : RawSlide msg -> List (Slide msg)
+cookSlide s = case s of
+    RawSlide sl -> [sl]
+    RawSlideGroup sls -> sls
 
 
