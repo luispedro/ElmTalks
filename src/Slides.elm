@@ -1,4 +1,4 @@
-module Slides exposing (Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, mdToHtml, img80, tagSlideGroup, mkSlideGroup, p)
+module Slides exposing (Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, mdToHtml, tagSlideGroup, mkSlideGroup)
 
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
@@ -57,17 +57,6 @@ markdownOptions =
     , smartypants = False
     }
 mdToHtml = Markdown.toHtmlWith markdownOptions []
-
-img80 src =
-    Html.div
-        [HtmlAttr.style "text-align" "center"]
-        [Html.img
-            [HtmlAttr.src src
-            ,HtmlAttr.style "width" "80%"]
-            []
-        ]
-
-p t = Html.p [] [Html.text t]
 
 
 

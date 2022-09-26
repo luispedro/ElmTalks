@@ -1,4 +1,4 @@
-module HtmlSimple exposing (floatLeftDiv, floatRightDiv, floatClear, textUL, img80, img50)
+module HtmlSimple exposing (floatLeftDiv, floatRightDiv, floatClear, textUL, img80, img50, p)
 
 import Html exposing (Html)
 import Html.Attributes as HtmlAttr
@@ -39,4 +39,4 @@ imgw w src =
             ,HtmlAttr.style "width" w]
             []
         ]
-
+p t = Html.p [] [Html.text t]
