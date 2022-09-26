@@ -1,4 +1,4 @@
-module Slides exposing (RawSlide(..), Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, mdToHtml, tagSlideGroup, mkSteppedSlide, cookSlides)
+module Slides exposing (RawSlide(..), Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, tagSlideGroup, mkSteppedSlide, cookSlides)
 
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
@@ -12,8 +12,6 @@ import Browser
 import Browser.Events
 import Browser.Navigation as Nav
 import Json.Decode exposing (Decoder)
-
-import Markdown
 
 type SlideType = FirstSlideInGroup | Follower | Special
 
@@ -61,14 +59,6 @@ mkIncrementalSlide title parts =
             mkSlideSimple title (List.concat (List.take ix parts)))
     |> tagSlideGroup
     |> RawSlideGroup
-
-markdownOptions =
-    { githubFlavored = Just { tables = True, breaks = False }
-    , defaultHighlighting = Nothing
-    , sanitize = False
-    , smartypants = False
-    }
-mdToHtml = Markdown.toHtmlWith markdownOptions []
 
 cookSlides : List (RawSlide msg) -> List (Slide msg)
 cookSlides = List.concatMap cookSlide

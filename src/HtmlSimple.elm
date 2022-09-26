@@ -1,8 +1,10 @@
-module HtmlSimple exposing (floatLeftDiv, floatRightDiv, floatClear, textUL, img80, img50, p)
+module HtmlSimple exposing (floatLeftDiv, floatRightDiv, floatClear, textUL, img80, img50, p, mdToHtml)
 
 import Html exposing (Html)
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (..)
+import Markdown
+
 
 floatLeftDiv : String -> List (Html msg) -> Html msg
 floatLeftDiv = floatRLDiv "left"
@@ -40,3 +42,12 @@ imgw w src =
             []
         ]
 p t = Html.p [] [Html.text t]
+
+markdownOptions =
+    { githubFlavored = Just { tables = True, breaks = False }
+    , defaultHighlighting = Nothing
+    , sanitize = False
+    , smartypants = False
+    }
+mdToHtml = Markdown.toHtmlWith markdownOptions []
+
