@@ -222,8 +222,19 @@ footer model =
         Html.div
             [HtmlAttr.id "footer"]
             [Html.p []
-                [Html.strong [HtmlAttr.style "padding-right" "42em"]
+                [Html.strong []
                     [Html.text "Luis Pedro Coelho"]
+                ,Html.img
+                    [HtmlAttr.src "/Media/twitter.png"
+                    ,HtmlAttr.style "width" "28px"
+                    ,HtmlAttr.style "margin-bottom" "-8px"
+                    ,HtmlAttr.style "margin-left" "20px"
+                    ,HtmlAttr.style "margin-right" "-4px"
+                    ]
+                    []
+                ,Html.text "@luispedrocoelho"
+                ,Html.span [HtmlAttr.style "padding-right" "42em"] []
+
                 ,Html.text metadata.shortTitle
                 ,Html.text "["
                 ,Html.text (String.fromInt cur)
