@@ -37,3 +37,18 @@ A {
     color: #005a32;
 }
 
+DIV.thumbnail {
+    border: 1px solid black;
+    width: 1920px;
+    position: absolute;
+    height: 1600px;
+    transform: scale(0.2);
+    padding: 1em;
+}
+
+DIV.thumbnail:hover {
+    border: 4px solid #005a32;
+    background-color: #eeeeee;
+    transform: scale(0.25);
+}
+

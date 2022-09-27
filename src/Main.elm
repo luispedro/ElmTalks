@@ -48,6 +48,7 @@ type Msg
     | NavTo String
     | GotoSlideNumber Int
     | GotoPosition Int
+    | PopToPosition Int
     | NextSlide
     | PreviousSlide
     | LastSlide
@@ -142,6 +143,7 @@ update slides msg model = case msg of
             let
                 real_ix = findIx slides (ix - 1)
             in update slides (GotoPosition real_ix) model
+        PopToPosition p -> update slides (GotoPosition p) { model | mode = SingleSlide }
         GotoPosition p ->
             let
                 n = List.length slides
@@ -207,18 +209,15 @@ viewPaged model =
                         topPos = String.fromInt (row * 360) ++ "px"
 
                     in Html.div
-                            [ HtmlAttr.style "width" "1920px"
-                            , HtmlAttr.style "height" "1600px"
-                            , HtmlAttr.style "transform" "scale(0.2)"
-                            , HtmlAttr.style "border" "1px solid black"
-                            , HtmlAttr.style "position" "absolute"
-                            , HtmlAttr.style "left" leftPos
+                            [ HtmlAttr.style "left" leftPos
                             , HtmlAttr.style "top" topPos
+                            , HtmlAttr.class "thumbnail"
+                            , onClick (PopToPosition ix)
                             ]
-
                             [ sl.content ]
                 in
-                    [Html.div
+                    [header
+                    ,Html.div
                         [ HtmlAttr.style "width" "1920px"
                         , HtmlAttr.style "height" "1600px"
                         , HtmlAttr.style "position" "absolute"
