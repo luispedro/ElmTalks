@@ -35,9 +35,11 @@ import Content exposing (slides, metadata)
  - version (one-based, counts by groups)
  -}
 
+type Mode = SingleSlide | Overview
 type alias Model =
     { position : Int
     , key : Nav.Key
+    , mode : Mode
     }
 
 
@@ -50,6 +52,7 @@ type Msg
     | PreviousSlide
     | LastSlide
     | FirstSlide
+    | ToggleMode
 
 
 main : Program () Model Msg
@@ -71,7 +74,7 @@ init () u k =
            Just f -> case String.toInt f of
                 Just s -> s
                 Nothing -> 1
-    in update slides (GotoSlideNumber islide) { position = 0, key = k }
+    in update slides (GotoSlideNumber islide) { position = 0, key = k, mode = SingleSlide }
 
 handleKeys : Decoder Msg
 handleKeys =
@@ -106,7 +109,9 @@ handleKeys =
                 then Json.Decode.succeed (GotoSlideNumber 40)
                 else if k == "9"
                 then Json.Decode.succeed (GotoSlideNumber 45)
-                else Json.Decode.fail ""
+                else if k == "t"
+                then Json.Decode.succeed ToggleMode
+                else Json.Decode.fail "Unknown key"
         )
 
 
@@ -157,6 +162,14 @@ update slides msg model = case msg of
             update slides (GotoPosition (List.length slides - 1)) model
         FirstSlide ->
             update slides (GotoPosition 0) model
+        ToggleMode ->
+            ( {model | mode = toggleMode model.mode}, Cmd.none )
+
+toggleMode : Mode -> Mode
+toggleMode m =
+    case m of
+        SingleSlide -> Overview
+        Overview -> SingleSlide
 
 advance1 : Model -> Int
 advance1 model =
@@ -179,7 +192,43 @@ getSlide n sl = case sl of
         else getSlide (n-1) rest
     _ -> slideErr
 
-view model =
+view model = case model.mode of
+    SingleSlide -> viewSingleSlide model
+    Overview -> viewPaged model
+
+viewPaged model =
+    { title = metadata.title
+    , body = let
+                v ix sl =
+                    let
+                        row = ix // 4
+                        col = modBy 4 ix
+                        leftPos = String.fromInt (col * 420) ++ "px"
+                        topPos = String.fromInt (row * 360) ++ "px"
+
+                    in Html.div
+                            [ HtmlAttr.style "width" "1920px"
+                            , HtmlAttr.style "height" "1600px"
+                            , HtmlAttr.style "transform" "scale(0.2)"
+                            , HtmlAttr.style "border" "1px solid black"
+                            , HtmlAttr.style "position" "absolute"
+                            , HtmlAttr.style "left" leftPos
+                            , HtmlAttr.style "top" topPos
+                            ]
+
+                            [ sl.content ]
+                in
+                    [Html.div
+                        [ HtmlAttr.style "width" "1920px"
+                        , HtmlAttr.style "height" "1600px"
+                        , HtmlAttr.style "position" "absolute"
+                        , HtmlAttr.style "left" "-720px"
+                        , HtmlAttr.style "top" "-600px"
+                        ]
+                        (List.indexedMap v slides)]
+    }
+
+viewSingleSlide model =
     let
         active : Slide msg
         active = getSlide model.position slides
