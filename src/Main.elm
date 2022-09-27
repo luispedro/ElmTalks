@@ -284,12 +284,10 @@ footer model =
                 ,Html.span [HtmlAttr.style "padding-right" "42em"] []
 
                 ,Html.text metadata.shortTitle
-                ,Html.text "["
+                ,Html.text " ["
                 ,Html.text (String.fromInt cur)
-                {-
                 ,Html.text "/"
                 ,Html.text (String.fromInt total)
-                -}
                 ,Html.text "]"
                 ]
             ]
