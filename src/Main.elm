@@ -203,8 +203,9 @@ viewPaged model =
     , body = let
                 v ix sl =
                     let
-                        row = ix // 4
-                        col = modBy 4 ix
+                        slides_per_row = 3
+                        row = ix // slides_per_row
+                        col = modBy slides_per_row ix
                         leftPos = String.fromInt (col * 420) ++ "px"
                         topPos = String.fromInt (row * 360) ++ "px"
 
@@ -221,7 +222,7 @@ viewPaged model =
                         [ HtmlAttr.style "width" "1920px"
                         , HtmlAttr.style "height" "1600px"
                         , HtmlAttr.style "position" "absolute"
-                        , HtmlAttr.style "left" "-720px"
+                        , HtmlAttr.style "left" "-600px"
                         , HtmlAttr.style "top" "-600px"
                         ]
                         (List.indexedMap v slides)]
