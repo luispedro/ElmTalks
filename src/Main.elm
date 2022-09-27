@@ -110,7 +110,7 @@ handleKeys =
                 then Json.Decode.succeed (GotoSlideNumber 40)
                 else if k == "9"
                 then Json.Decode.succeed (GotoSlideNumber 45)
-                else if k == "t"
+                else if k == "o"
                 then Json.Decode.succeed ToggleMode
                 else Json.Decode.fail "Unknown key"
         )
