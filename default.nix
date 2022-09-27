@@ -14,15 +14,12 @@ let
     , src
     , name
     , srcdir ? "./src"
-    , targets ? []
     , registryDat ? ./registry.dat
-    , outputJavaScript ? false
     }:
     stdenv.mkDerivation {
       inherit name src;
 
-      buildInputs = [ elmPackages.elm ]
-        ++ lib.optional outputJavaScript nodePackages.uglify-js;
+      buildInputs = [ elmPackages.elm ];
 
       buildPhase = pkgs.elmPackages.fetchElmDeps {
         elmPackages = import srcs;
@@ -30,19 +27,8 @@ let
         inherit registryDat;
       };
 
-      installPhase = let
-        elmfile = module: "${srcdir}/${builtins.replaceStrings ["."] ["/"] module}.elm";
-        extension = if outputJavaScript then "js" else "html";
-      in ''
-        ${lib.concatStrings (map (module: ''
-          echo "compiling ${elmfile module}"
-          elm make ${elmfile module} --optimize --output $out/${module}.${extension}
-          ${lib.optionalString outputJavaScript ''
-            echo "minifying ${elmfile module}"
-            uglifyjs $out/${module}.${extension} --compress 'pure_funcs="F2,F3,F4,F5,F6,F7,F8,F9,A2,A3,A4,A5,A6,A7,A8,A9",pure_getters,keep_fargs=false,unsafe_comps,unsafe' \
-                | uglifyjs --mangle --output $out/${module}.min.${extension}
-          ''}
-        '') targets)}
+      installPhase = ''
+        elm make --optimize src/Main.elm --output $out/index.html
         cp -pir Media $out/
         cp -pir assets $out/
       '';
@@ -54,8 +40,6 @@ in mkDerivation {
   src = builtins.filterSource
             (path: _type: baseNameOf path != ".git" && baseNameOf path != "result")
             ./.;
-  targets = ["Main"];
   srcdir = "./src";
-  outputJavaScript = false;
 }
 
