@@ -28,7 +28,7 @@ import Markdown
 
 
 import Slides exposing (Slide, SlideType(..), SlideShow)
-import Content exposing (slides, metadata)
+import Content exposing (slides, metadata, options)
 
 {- The term `position` will refer to the internal counter (zero-based, indexes
  - into the slides list) and the term `slide number` will be the human readable
@@ -287,9 +287,10 @@ footer model =
                 ,Html.text metadata.shortTitle
                 ,Html.text " ["
                 ,Html.text (String.fromInt cur)
-                ,Html.text "/"
-                ,Html.text (String.fromInt total)
-                ,Html.text "]"
+                ,Html.text <|
+                    if options.includeTotalNrSlides
+                        then "/" ++ String.fromInt total ++ "]"
+                        else "]"
                 ]
             ]
 
