@@ -1,4 +1,18 @@
-module Slides exposing (RawSlide(..), Slide, SlideType(..), SlideShow, mkSlide, mkIncrementalSlide, tagSlideGroup, mkSteppedSlide, cookSlides)
+module Slides exposing
+    ( RawSlide(..)
+    , Slide
+    , SlideType(..)
+    , SlideShow
+
+    , mkSlide
+    , mkIncrementalSlide
+    , mkSteppedSlide
+
+    , cookSlides
+    , tagSlideGroup
+    , skipSlide
+    )
+
 
 import Html exposing (..)
 import Html.Attributes as HtmlAttr
@@ -68,4 +82,7 @@ cookSlide s = case s of
     RawSlide sl -> [sl]
     RawSlideGroup sls -> sls
 
+
+skipSlide : RawSlide msg -> RawSlide msg
+skipSlide _ = RawSlideGroup []
 
