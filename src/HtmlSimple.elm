@@ -13,6 +13,7 @@ module HtmlSimple exposing
         , p
         , h1
         , h2
+        , h3
 
         , mdToHtml
         )
@@ -64,6 +65,7 @@ imgw w src =
 p t = Html.p [] [Html.text t]
 h1 t = Html.h1 [] [Html.text t]
 h2 t = Html.h2 [] [Html.text t]
+h3 t = Html.h3 [] [Html.text t]
 
 markdownOptions =
     { githubFlavored = Just { tables = True, breaks = False }
