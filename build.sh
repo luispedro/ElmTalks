@@ -8,4 +8,5 @@ fi
 rm -rf dist/
 elm make --optimize src/Main.elm
 mkdir dist
-cp -pir Media assets index.html dist
+cp -pir assets index.html dist
+python copy-Media-files.py
