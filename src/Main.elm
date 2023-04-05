@@ -229,7 +229,7 @@ viewSingleSlide model =
                     [HtmlAttr.id "main-content"]
                     [ header
                     , active.content
-                    --, footer model
+                    , footer model
                     ]
                 ]
             }
