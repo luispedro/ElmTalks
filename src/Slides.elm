@@ -11,6 +11,7 @@ module Slides exposing
     , cookSlides
     , tagSlideGroup
     , skipSlide
+    , mkExtra
     )
 
 
@@ -35,7 +36,7 @@ type alias Slide msg =
     }
 type alias SlideShow msg = List (Slide msg)
 
-type RawSlide msg = RawSlide (Slide msg) | RawSlideGroup (List (Slide msg))
+type RawSlide msg = RawSlide (Slide msg) | RawSlideGroup (List (Slide msg)) | RawExtraSlides (List (Slide msg))
 
 mkSlide : String -> List (Html msg) -> RawSlide msg
 mkSlide title body = RawSlide <|
@@ -75,14 +76,30 @@ mkIncrementalSlide title parts =
     |> RawSlideGroup
 
 cookSlides : List (RawSlide msg) -> List (Slide msg)
-cookSlides = List.concatMap cookSlide
+cookSlides slides =
+    moveExtrasToEnd slides
+    |> List.concatMap cookSlide
 
 cookSlide : RawSlide msg -> List (Slide msg)
 cookSlide s = case s of
     RawSlide sl -> [sl]
     RawSlideGroup sls -> sls
+    RawExtraSlides sls -> sls
 
 
 skipSlide : RawSlide msg -> RawSlide msg
 skipSlide _ = RawSlideGroup []
+
+mkExtra : RawSlide msg -> RawSlide msg
+mkExtra s = case s of
+    RawSlide sl -> RawExtraSlides [sl]
+    RawSlideGroup sg -> RawExtraSlides sg
+    RawExtraSlides _ -> s
+
+moveExtrasToEnd slides =
+    let
+        isNormal s = case s of
+                        RawExtraSlides _ -> False
+                        _ -> True
+    in List.filter isNormal slides ++ List.filter (not << isNormal) slides
 
