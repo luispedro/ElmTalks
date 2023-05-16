@@ -52,3 +52,7 @@ DIV.thumbnail:hover {
     transform: scale(0.25);
 }
 
+TABLE {
+  border-collapse: collapse;
+}
+
