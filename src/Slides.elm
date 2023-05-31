@@ -9,7 +9,6 @@ module Slides exposing
     , mkSteppedSlide
 
     , cookSlides
-    , tagSlideGroup
     , skipSlide
     , mkExtra
     )
@@ -28,7 +27,7 @@ import Browser.Events
 import Browser.Navigation as Nav
 import Json.Decode exposing (Decoder)
 
-type SlideType = FirstSlideInGroup | Follower | Special
+type SlideType = FirstSlideInGroup | Follower | Special | Extra
 
 type alias Slide msg =
     { content : Html msg
@@ -90,12 +89,18 @@ cookSlide s = case s of
 skipSlide : RawSlide msg -> RawSlide msg
 skipSlide _ = RawSlideGroup []
 
+tagExtra : Slide msg -> Slide msg
+tagExtra s = { s | slideType = Extra }
 mkExtra : RawSlide msg -> RawSlide msg
-mkExtra s = case s of
-    RawSlide sl -> RawExtraSlides [sl]
-    RawSlideGroup sg -> RawExtraSlides sg
-    RawExtraSlides _ -> s
+mkExtra s =
+    let
+        sl = case s of
+            RawSlide ss -> [ss]
+            RawSlideGroup sg -> sg
+            RawExtraSlides sg -> sg
+    in RawExtraSlides (List.map tagExtra sl)
 
+moveExtrasToEnd : List (RawSlide msg) -> List (RawSlide msg)
 moveExtrasToEnd slides =
     let
         isNormal s = case s of
