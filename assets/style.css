@@ -56,3 +56,16 @@ TABLE {
   border-collapse: collapse;
 }
 
+TABLE THEAD {
+    border-bottom: 1px solid #005a32;
+    padding: 0.5em;
+}
+TABLE TH {
+    text-align: left;
+    padding-right: 0.5em;
+}
+
+TABLE TD {
+    text-align: right;
+}
+
