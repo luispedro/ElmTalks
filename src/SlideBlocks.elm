@@ -31,9 +31,9 @@ mkBlockedSlide title blocks =
                 NextSingle -> countBlocks (n + 1) rest
                 NextStay -> countBlocks (n + 1) rest
                 In ixs -> case List.maximum (n::ixs) of
-                    Nothing -> countBlocks n rest
-                    Just m -> countBlocks m rest
-        total = 1 + countBlocks 0 blocks
+                    Nothing -> countBlocks (n + 1) rest
+                    Just m -> countBlocks (m + 1) rest
+        total = countBlocks 1 blocks
         allBlocks = List.range 0 (total - 1)
 
         convertBlocks : Int -> List (SlideBlock msg) -> List ((List Int), List (Html msg))
@@ -44,7 +44,7 @@ mkBlockedSlide title blocks =
                 NextSingle -> ([cur], h.body) :: convertBlocks (cur + 1) rest
                 NextStay -> (List.range cur (total - 1), h.body) :: convertBlocks (cur + 1) rest
                 In ixs -> (ixs, h.body) :: convertBlocks cur rest
-        blocksTagged = convertBlocks 0 blocks
+        blocksTagged = convertBlocks 1 blocks
     in
         allBlocks
             |> List.map (\ix ->
