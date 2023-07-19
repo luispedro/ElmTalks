@@ -21,7 +21,7 @@ import Content exposing (slides, metadata, options)
  - version (one-based, counts by groups)
  -}
 
-type Mode = SingleSlide | Overview
+type Mode = SingleSlide | Overview | Print
 type alias Model =
     { position : Int
     , key : Nav.Key
@@ -40,6 +40,7 @@ type Msg
     | LastSlide
     | FirstSlide
     | ToggleMode
+    | TogglePrintMode
 
 
 main : Program () Model Msg
@@ -98,6 +99,8 @@ handleKeys =
                 then Json.Decode.succeed (GotoSlideNumber 45)
                 else if k == "o"
                 then Json.Decode.succeed ToggleMode
+                else if k == "a"
+                then Json.Decode.succeed TogglePrintMode
                 else Json.Decode.fail "Unknown key"
         )
 
@@ -152,12 +155,20 @@ update slides msg model = case msg of
             update slides (GotoPosition 0) model
         ToggleMode ->
             ( {model | mode = toggleMode model.mode}, Cmd.none )
+        TogglePrintMode ->
+            ( {model | mode = togglePrintMode model.mode }, Cmd.none )
 
 toggleMode : Mode -> Mode
 toggleMode m =
-    case m of
-        SingleSlide -> Overview
-        Overview -> SingleSlide
+    if m == Overview
+    then SingleSlide
+    else Overview
+
+togglePrintMode : Mode -> Mode
+togglePrintMode m =
+    if m == Print
+    then SingleSlide
+    else Print
 
 advance1 : Model -> Int
 advance1 model =
@@ -183,6 +194,7 @@ getSlide n sl = case sl of
 view model = case model.mode of
     SingleSlide -> viewSingleSlide model
     Overview -> viewPaged model
+    Print -> viewPrint model
 
 viewPaged model =
     { title = metadata.title
@@ -212,6 +224,18 @@ viewPaged model =
                         , HtmlAttr.style "top" "-600px"
                         ]
                         (List.indexedMap v slides)]
+    }
+
+viewPrint model =
+    { title = metadata.title
+    , body =
+        [ header
+        , Html.div
+            [HtmlAttr.id "main-content"
+            ,HtmlAttr.class "print-mode"
+            ]
+            (List.map .content slides)
+        ]
     }
 
 viewSingleSlide model =
