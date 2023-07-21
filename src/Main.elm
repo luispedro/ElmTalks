@@ -292,8 +292,10 @@ footer model =
                     ]
                     []
                 ,Html.text "@luispedrocoelho"
-                ,Html.span [HtmlAttr.style "padding-right" "42em"] []
-
+                ,Html.span [HtmlAttr.style "padding-right" "12em"] []
+                ,Html.a [HtmlAttr.href "https://2023-07-25-talk-semibin.big-data-biology.org/"]
+                        [Html.text "https://2023-07-25-talk-semibin.big-data-biology.org/"]
+                ,Html.span [HtmlAttr.style "padding-right" "12em"] []
                 ,Html.text metadata.shortTitle
                 ,Html.text " ["
                 ,Html.text (String.fromInt cur)
