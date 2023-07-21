@@ -10,8 +10,7 @@ import Browser.Navigation as Nav
 import Url
 import Json.Decode exposing (Decoder)
 
-import Markdown
-
+import HtmlSimple as HS
 
 import Slides exposing (Slide, SlideType(..), SlideShow)
 import Content exposing (slides, metadata, options)
@@ -21,7 +20,7 @@ import Content exposing (slides, metadata, options)
  - version (one-based, counts by groups)
  -}
 
-type Mode = SingleSlide | Overview | Print
+type Mode = SingleSlide | Overview | Print | Help
 type alias Model =
     { position : Int
     , key : Nav.Key
@@ -41,6 +40,7 @@ type Msg
     | FirstSlide
     | ToggleMode
     | TogglePrintMode
+    | ToggleHelpMode
 
 
 main : Program () Model Msg
@@ -101,6 +101,8 @@ handleKeys =
                 then Json.Decode.succeed ToggleMode
                 else if k == "a"
                 then Json.Decode.succeed TogglePrintMode
+                else if k == "?"
+                then Json.Decode.succeed ToggleHelpMode
                 else Json.Decode.fail "Unknown key"
         )
 
@@ -157,6 +159,8 @@ update slides msg model = case msg of
             ( {model | mode = toggleMode model.mode}, Cmd.none )
         TogglePrintMode ->
             ( {model | mode = togglePrintMode model.mode }, Cmd.none )
+        ToggleHelpMode ->
+            ( {model | mode = toggleHelpMode model.mode }, Cmd.none )
 
 toggleMode : Mode -> Mode
 toggleMode m =
@@ -169,6 +173,11 @@ togglePrintMode m =
     if m == Print
     then SingleSlide
     else Print
+toggleHelpMode : Mode -> Mode
+toggleHelpMode m =
+    if m == Help
+    then SingleSlide
+    else Help
 
 advance1 : Model -> Int
 advance1 model =
@@ -195,6 +204,7 @@ view model = case model.mode of
     SingleSlide -> viewSingleSlide model
     Overview -> viewPaged model
     Print -> viewPrint model
+    Help -> viewHelp model
 
 viewPaged model =
     { title = metadata.title
@@ -257,6 +267,22 @@ viewSingleSlide model =
                     ]
                 ]
             }
+
+viewHelp model =
+    let
+        base = viewSingleSlide model
+        helpOverlay =
+            Html.div
+                [HtmlAttr.id "overlay"]
+                [HS.h1 "Help"
+                ,HS.mdToHtml """
+### Keys
+- `J`/`N`/`ArrowLeft`: next
+- `K`/`P`/`ArrowRight`: previous
+- `O`: toggle overview mode
+- `A`: toggle print mode (short for _All_)
+- `?`: toggle help mode"""]
+    in { base | body = helpOverlay :: base.body }
 
 
 header : Html Msg

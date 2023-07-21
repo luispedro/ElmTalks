@@ -7,10 +7,10 @@ DIV.slide {
     font-size: 16pt;
 }
 
-DIV.slide H1 {
+H1 {
     font-variant: small-caps;
 }
-DIV.slide H1, H2,H3 {
+H1, H2,H3, H4 {
     padding-top: 0px;
     margin-top: 0px;
     font-family: sans-serif;
@@ -91,3 +91,17 @@ TABLE TD {
         border-bottom: 1px solid black;
     }
 }
+
+#overlay {
+  position: fixed;
+  padding: 2%;
+  width: 60%;
+  height: 60%;
+  top: 10%;
+  left: 10%;
+  font-size: 24pt;
+  border: 2px solid black;
+  border-radius: 10px;
+  background-color: rgba(255,255,195,0.9);
+}
+
