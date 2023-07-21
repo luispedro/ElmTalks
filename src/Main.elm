@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Html exposing (..)
+import Html exposing (Html)
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (onClick)
 
@@ -261,7 +261,7 @@ viewSingleSlide model =
 
 header : Html Msg
 header =
-    node "link"
+    Html.node "link"
         [ HtmlAttr.rel "stylesheet"
         , HtmlAttr.href "/assets/style.css"
         ]
