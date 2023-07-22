@@ -1,8 +1,8 @@
 DIV.slide {
     clear: both;
-    margin-left: 5vw;
+    margin-left: 2vw;
     margin-top: 2vh;
-    width: 90vw;
+    width: 96vw;
     height: 90vh;
     font-size: 20pt;
 }
@@ -25,6 +25,11 @@ DIV.slide IMG {
 
 DIV#footer {
     clear: both;
+    position: fixed;
+    top: 94vh;
+    left: 0px;
+    width: 100vw;
+    height: 3vh;
     border-top: 1px solid #005a32;
     margin-top: 0px;
     padding-top: 2px;
@@ -32,6 +37,10 @@ DIV#footer {
     margin: 0px;
     padding-bottom: 0px;
     font-family: sans-serif;
+}
+
+DIV#footer P {
+    margin-top: 0px;
 }
 
 A {

@@ -14,6 +14,7 @@ import HtmlSimple as HS
 
 import Slides exposing (Slide, SlideType(..), SlideShow)
 import Content exposing (slides, metadata, options)
+import Content.Common exposing (twitterLink)
 
 {- The term `position` will refer to the internal counter (zero-based, indexes
  - into the slides list) and the term `slide number` will be the human readable
@@ -309,19 +310,11 @@ footer model =
             [Html.p []
                 [Html.strong []
                     [Html.text "Luis Pedro Coelho"]
-                ,Html.img
-                    [HtmlAttr.src "/Media/twitter.png"
-                    ,HtmlAttr.style "width" "28px"
-                    ,HtmlAttr.style "margin-bottom" "-8px"
-                    ,HtmlAttr.style "margin-left" "20px"
-                    ,HtmlAttr.style "margin-right" "-4px"
-                    ]
-                    []
-                ,Html.text "@luispedrocoelho"
-                ,Html.span [HtmlAttr.style "padding-right" "12em"] []
+                ,twitterLink "luispedrocoelho"
+                ,Html.span [HtmlAttr.style "padding-right" "18em"] []
                 ,Html.a [HtmlAttr.href "https://2023-07-25-talk-semibin.big-data-biology.org/"]
                         [Html.text "https://2023-07-25-talk-semibin.big-data-biology.org/"]
-                ,Html.span [HtmlAttr.style "padding-right" "12em"] []
+                ,Html.span [HtmlAttr.style "padding-right" "24em"] []
                 ,Html.text metadata.shortTitle
                 ,Html.text " ["
                 ,Html.text (String.fromInt cur)
