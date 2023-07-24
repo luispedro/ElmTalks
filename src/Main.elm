@@ -246,6 +246,7 @@ viewPrint model =
             ,HtmlAttr.class "print-mode"
             ]
             (List.map .content slides)
+        , footer model
         ]
     }
 

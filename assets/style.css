@@ -99,6 +99,9 @@ TABLE TD {
     DIV.print-mode DIV.slide {
         border-bottom: 1px solid black;
     }
+    DIV.print-mode + DIV#footer {
+        visibility: hidden;
+    }
 }
 
 #overlay {
