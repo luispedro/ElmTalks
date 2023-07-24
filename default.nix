@@ -21,7 +21,7 @@ let
     stdenv.mkDerivation {
       inherit name src;
 
-      buildInputs = [ elmPackages.elm ];
+      buildInputs = [ elmPackages.elm python3 ];
 
       buildPhase = pkgs.elmPackages.fetchElmDeps {
         elmPackages = import srcs;
@@ -31,8 +31,9 @@ let
 
       installPhase = ''
         elm make --optimize src/Main.elm --output $out/index.html
-        cp -pir Media $out/
         cp -pir assets $out/
+
+        python copy-Media-files.py $out/
       '';
     };
 

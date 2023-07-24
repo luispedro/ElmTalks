@@ -1,24 +1,30 @@
 import re
 import shutil
 from os import makedirs, path
+from sys import argv
 from glob import glob
 
 pat = re.compile(f'\/Media\/(?P<mid>.*)(?P<name>.*)\.(?P<ext>[^\'"]*)')
 pat_fromString = re.compile(f"' \+ \(\$elm\$core\$String\$fromInt\(.+\) \+ '")
 
-makedirs('./dist/Media/', exist_ok=True)
+if len(argv) >= 2:
+    target = argv[1]
+else:
+    target = './dist'
 
-with open('./dist/index.html', 'r') as ifile:
+makedirs(f'{target}/Media/', exist_ok=True)
+
+with open(f'{target}/index.html', 'r') as ifile:
     for line in ifile:
         if m := pat.search(line):
             f = m.group(0)
             # f includes the leading slash
-            makedirs(f'./dist{f[:f.rfind("/")]}', exist_ok=True)
+            makedirs(f'{target}{f[:f.rfind("/")]}', exist_ok=True)
             if path.exists(f[1:]):
-                shutil.copyfile(f[1:], f'dist{f}')
+                shutil.copyfile(f[1:], f'{target}{f}')
             elif g := pat_fromString.sub('*', f):
                 for f in glob(g[1:]):
-                    shutil.copyfile(f, f'dist/{f}')
+                    shutil.copyfile(f, f'{target}/{f}')
             else:
                 raise IOError('File not found: ' + f)
 
