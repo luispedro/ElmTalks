@@ -279,8 +279,8 @@ viewHelp model =
                 [HS.h1 "Help"
                 ,HS.mdToHtml """
 ### Keys
-- `J`/`N`/`ArrowLeft`: next
-- `K`/`P`/`ArrowRight`: previous
+- `J`/`N`/`ArrowRight`: next
+- `K`/`P`/`ArrowLeft`: previous
 - `O`: toggle overview mode
 - `A`: toggle print mode (short for _All_)
 - `?`: toggle help mode"""]
