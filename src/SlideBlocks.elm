@@ -24,16 +24,25 @@ type alias SlideBlock msg =
 mkBlockedSlide : String -> List (SlideBlock msg) -> Slides.RawSlide msg
 mkBlockedSlide title blocks =
     let
-        countBlocks n bs = case bs of
-            [] -> n
+        -- It simplifies the logic if the first block is never a All block
+        firstFixed = case blocks of
+            [] -> []
+            (f :: rest) ->
+                let
+                    ff = case f.presence of
+                        All -> { f | presence = NextStay }
+                        _ -> f
+                in (ff::rest)
+        blockIndices n bs = case bs of
+            [] -> []
             (h :: rest) -> case h.presence of
-                All -> countBlocks n rest
-                NextSingle -> countBlocks (n + 1) rest
-                NextStay -> countBlocks (n + 1) rest
-                In ixs -> case List.maximum (n::ixs) of
-                    Nothing -> countBlocks (n + 1) rest
-                    Just m -> countBlocks m rest
-        total = 1 + countBlocks 0 blocks
+                All -> blockIndices n rest
+                NextSingle -> n :: blockIndices (n + 1) rest
+                NextStay -> n :: blockIndices (n + 1) rest
+                In ixs -> ixs ++ blockIndices n rest
+        total = case List.maximum <| blockIndices 0 firstFixed of
+            Nothing -> 0
+            Just m -> m + 1
         allBlocks = List.range 0 (total - 1)
 
         convertBlocks : Int -> List (SlideBlock msg) -> List ((List Int), List (Html msg))
@@ -44,7 +53,7 @@ mkBlockedSlide title blocks =
                 NextSingle -> ([cur], h.body) :: convertBlocks (cur + 1) rest
                 NextStay -> (List.range cur (total - 1), h.body) :: convertBlocks (cur + 1) rest
                 In ixs -> (ixs, h.body) :: convertBlocks cur rest
-        blocksTagged = convertBlocks 0 blocks
+        blocksTagged = convertBlocks 0 firstFixed
     in
         allBlocks
             |> List.map (\ix ->
