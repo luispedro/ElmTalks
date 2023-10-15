@@ -312,10 +312,9 @@ footer model =
                 [Html.strong []
                     [Html.text "Luis Pedro Coelho"]
                 ,twitterLink "luispedrocoelho"
-                ,Html.span [HtmlAttr.style "padding-right" "18em"] []
-                ,Html.a [HtmlAttr.href "https://2023-07-25-talk-semibin.big-data-biology.org/"]
-                        [Html.text "https://2023-07-25-talk-semibin.big-data-biology.org/"]
-                ,Html.span [HtmlAttr.style "padding-right" "24em"] []
+                ,Html.span [HtmlAttr.style "padding-right" "14em"] []
+                ,HS.textA "https://2023-10-16-lpc-peptides.big-data-biology.org/" "https://2023-10-16-lpc-peptides.big-data-biology.org/"
+                ,Html.span [HtmlAttr.style "padding-right" "16em"] []
                 ,Html.text metadata.shortTitle
                 ,Html.text " ["
                 ,Html.text (String.fromInt cur)
