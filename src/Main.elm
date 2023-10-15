@@ -39,7 +39,7 @@ type Msg
     | PreviousSlide
     | LastSlide
     | FirstSlide
-    | ToggleMode
+    | ToggleOverviewMode
     | TogglePrintMode
     | ToggleHelpMode
 
@@ -99,7 +99,7 @@ handleKeys =
                 else if k == "9"
                 then Json.Decode.succeed (GotoSlideNumber 45)
                 else if k == "o"
-                then Json.Decode.succeed ToggleMode
+                then Json.Decode.succeed ToggleOverviewMode
                 else if k == "a"
                 then Json.Decode.succeed TogglePrintMode
                 else if k == "?"
@@ -156,15 +156,15 @@ update slides msg model = case msg of
             update slides (GotoPosition (List.length slides - 1)) model
         FirstSlide ->
             update slides (GotoPosition 0) model
-        ToggleMode ->
-            ( {model | mode = toggleMode model.mode}, Cmd.none )
+        ToggleOverviewMode ->
+            ( {model | mode = toggleOverviewMode model.mode}, Cmd.none )
         TogglePrintMode ->
             ( {model | mode = togglePrintMode model.mode }, Cmd.none )
         ToggleHelpMode ->
             ( {model | mode = toggleHelpMode model.mode }, Cmd.none )
 
-toggleMode : Mode -> Mode
-toggleMode m =
+toggleOverviewMode : Mode -> Mode
+toggleOverviewMode m =
     if m == Overview
     then SingleSlide
     else Overview
@@ -232,7 +232,7 @@ viewPaged model =
                         , HtmlAttr.style "height" "1600px"
                         , HtmlAttr.style "position" "absolute"
                         , HtmlAttr.style "left" "-600px"
-                        , HtmlAttr.style "top" "-600px"
+                        , HtmlAttr.style "top" "-400px"
                         ]
                         (List.indexedMap v slides)]
     }
