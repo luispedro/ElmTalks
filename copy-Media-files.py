@@ -5,6 +5,7 @@ from sys import argv
 from glob import glob
 
 pat = re.compile(f'\/Media\/(?P<mid>.*)(?P<name>.*)\.(?P<ext>[^\'"]*)')
+pat_stepped = re.compile(f'\/Media\/(?P<mid>.*)(?P<name>.*)_stepped-')
 pat_fromString = re.compile(f"' \+ \(\$elm\$core\$String\$fromInt\(.+\) \+ '")
 
 if len(argv) >= 2:
@@ -27,5 +28,8 @@ with open(f'{target}/index.html', 'r') as ifile:
                     shutil.copyfile(f, f'{target}/{f}')
             else:
                 raise IOError('File not found: ' + f)
-
-
+        elif m := pat_stepped.search(line):
+            f = m.group(0)
+            for f in glob(f'{f[1:]}*'):
+                shutil.copyfile(f, f'{target}/{f}')
+                print(f)
