@@ -30,6 +30,6 @@ with open(f'{target}/index.html', 'r') as ifile:
                 raise IOError('File not found: ' + f)
         elif m := pat_stepped.search(line):
             f = m.group(0)
+            makedirs(f'{target}{f[:f.rfind("/")]}', exist_ok=True)
             for f in glob(f'{f[1:]}*'):
                 shutil.copyfile(f, f'{target}/{f}')
-                print(f)
