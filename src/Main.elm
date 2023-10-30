@@ -312,9 +312,13 @@ footer model =
                 [Html.strong []
                     [Html.text "Luis Pedro Coelho"]
                 ,twitterLink "luispedrocoelho"
-                ,Html.span [HtmlAttr.style "padding-right" "14em"] []
-                ,HS.textA "https://2023-10-16-lpc-peptides.big-data-biology.org/" "https://2023-10-16-lpc-peptides.big-data-biology.org/"
-                ,Html.span [HtmlAttr.style "padding-right" "16em"] []
+                ,case options.footerUrl of
+                    Nothing -> Html.span [HtmlAttr.style "padding-right" "20em"] []
+                    Just url ->
+                        Html.span [HtmlAttr.style "padding-right" "12em"]
+                            [HS.textA url url]
+
+                ,Html.span [HtmlAttr.style "padding-right" "12em"] []
                 ,Html.text metadata.shortTitle
                 ,Html.text " ["
                 ,Html.text (String.fromInt cur)
