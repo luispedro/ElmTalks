@@ -1,8 +1,8 @@
 let
 fixed_nixpkgs = builtins.fetchTarball {
-      name = "nixpks-unstable-2022-09";
-      url = "https://github.com/nixos/nixpkgs/archive/3d6636ba27ca348f3f110d8fa6c9d7ae1fce648a.tar.gz";
-      sha256 = "0dph11l5mgqlylhq86b0x3zg1n1vpy1j2f81b00l71j8qmwr3z8z";
+      name = "nixpkgs-unstable-2023-09";
+      url = "https://github.com/nixos/nixpkgs/archive/efcde1d6685d05db10e3bce06563d225cba90c48.tar.gz";
+      sha256 = "1jq2yy1777pnzgf1dqxcpv04xvg9jm35cfar99yhzw9y2sc7cn43";
     };
 in
 
