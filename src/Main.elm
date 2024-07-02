@@ -308,17 +308,36 @@ footer model =
     in
         Html.div
             [HtmlAttr.id "footer"]
-            [Html.p []
-                [Html.strong []
+            [ Html.div
+                [HtmlAttr.style "position" "absolute"
+                ,HtmlAttr.style "width" "10%"
+                ,HtmlAttr.style "left" "94vw"
+                ,HtmlAttr.style "top" "-40px"
+                ]
+                [Html.img
+                        [HtmlAttr.src "/Media/bdb-logo_128px.png"
+                        ,HtmlAttr.style "width" "72px"
+                        ] []
+                ]
+            ,Html.p [
+                HtmlAttr.style "padding-right" "56px"
+                ]
+                [Html.img [ HtmlAttr.src "/Media/qut-logo-blue_bg.png"
+                          , HtmlAttr.style "height" "40px"
+                          , HtmlAttr.style "margin-bottom" "-20px"
+                          , HtmlAttr.style "margin-left" "-30px"
+                          , HtmlAttr.style "margin-right" "10px"
+                          ] []
+                , Html.strong [HtmlAttr.style "padding-right" "1em"]
                     [Html.text "Luis Pedro Coelho"]
                 ,twitterLink "luispedrocoelho"
                 ,case options.footerUrl of
-                    Nothing -> Html.span [HtmlAttr.style "padding-right" "20em"] []
+                    Nothing -> Html.span [HtmlAttr.style "padding-right" "12em"] []
                     Just url ->
-                        Html.span [HtmlAttr.style "padding-right" "12em"]
+                        Html.span [HtmlAttr.style "padding-left" "9em"]
                             [HS.textA url url]
 
-                ,Html.span [HtmlAttr.style "padding-right" "12em"] []
+                ,Html.span [HtmlAttr.style "padding-right" "8em"] []
                 ,Html.text metadata.shortTitle
                 ,Html.text " ["
                 ,Html.text (String.fromInt cur)
