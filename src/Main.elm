@@ -323,7 +323,8 @@ footer model =
                 HtmlAttr.style "padding-right" "56px"
                 ]
                 [Html.img [ HtmlAttr.src "/Media/qut-logo-blue_bg.png"
-                          , HtmlAttr.style "height" "40px"
+                          , HtmlAttr.style "height" "80px"
+                          , HtmlAttr.style "margin-top" "-40px"
                           , HtmlAttr.style "margin-bottom" "-20px"
                           , HtmlAttr.style "margin-left" "-30px"
                           , HtmlAttr.style "margin-right" "10px"
