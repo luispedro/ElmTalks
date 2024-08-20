@@ -54,11 +54,16 @@ textOL = Html.ol [] << List.map (Html.li [] << List.singleton << Html.text)
 img50 = imgw "50%"
 img80 = imgw "80%"
 
+addStartingSlash s =
+    if String.left 6 s == "Media/"
+    then "/" ++ s
+    else s
+
 imgw w src =
     Html.div
         [HtmlAttr.style "text-align" "center"]
         [Html.img
-            [HtmlAttr.src src
+            [HtmlAttr.src (addStartingSlash src)
             ,HtmlAttr.style "width" w]
             []
         ]
