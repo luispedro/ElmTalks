@@ -262,7 +262,9 @@ viewSingleSlide model =
         else { title = metadata.title
             , body = [
                 Html.div
-                    [HtmlAttr.id "main-content"]
+                    [HtmlAttr.id "main-content"
+                    ,onClick NextSlide
+                    ]
                     [ header
                     , active.content
                     , footer model
