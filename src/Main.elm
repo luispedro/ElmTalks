@@ -335,12 +335,12 @@ footer model =
                     [Html.text "Luis Pedro Coelho"]
                 ,twitterLink "luispedrocoelho"
                 ,case options.footerUrl of
-                    Nothing -> Html.span [HtmlAttr.style "padding-right" "12em"] []
+                    Nothing -> Html.span [HtmlAttr.style "padding-right" "24em"] []
                     Just url ->
-                        Html.span [HtmlAttr.style "padding-left" "9em"]
+                        Html.span [HtmlAttr.style "padding-left" "21em"]
                             [HS.textA url url]
 
-                ,Html.span [HtmlAttr.style "padding-right" "8em"] []
+                ,Html.span [HtmlAttr.style "padding-right" "21em"] []
                 ,Html.text metadata.shortTitle
                 ,Html.text " ["
                 ,Html.text (String.fromInt cur)
