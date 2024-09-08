@@ -18,10 +18,6 @@ import Html exposing (..)
 import Html.Attributes as HtmlAttr
 import Html.Events exposing (..)
 
-import Chart as C
-import Svg as S
-import Chart.Attributes as CA
-
 import Browser
 import Browser.Events
 import Browser.Navigation as Nav
