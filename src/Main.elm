@@ -32,7 +32,7 @@ type alias Model =
 type Msg
     = NoMsg
     | NavTo String
-    | GotoSlideNumber Int
+    | GotoSlideNumber Int Int
     | GotoPosition Int
     | PopToPosition Int
     | NextSlide
@@ -58,12 +58,20 @@ main =
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init () u k =
     let
-        islide = case u.fragment of
-           Nothing -> 1
-           Just f -> case String.toInt f of
-                Just s -> s
-                Nothing -> 1
-    in update slides (GotoSlideNumber islide) { position = 0, key = k, mode = SingleSlide }
+        (islide, off) = case u.fragment of
+           Nothing -> (1, 0)
+           Just f ->
+               let
+                    tokens = String.split "." f
+               in case tokens of
+                    [s] -> case String.toInt s
+                        of Just i -> (i, 0)
+                           Nothing -> (1, 0)
+                    [s, o] -> case (String.toInt s, String.toInt o) of
+                        (Just i, Just on) -> (i, on)
+                        _ -> (1, 0)
+                    _ -> (1, 0)
+    in update slides (GotoSlideNumber islide off) { position = 0, key = k, mode = SingleSlide }
 
 handleKeys : Decoder Msg
 handleKeys =
@@ -79,25 +87,25 @@ handleKeys =
                 else if List.member k ["l", "L"]
                 then Json.Decode.succeed LastSlide
                 else if k == "0"
-                then Json.Decode.succeed (GotoSlideNumber 1)
+                then Json.Decode.succeed (GotoSlideNumber 1 0)
                 else if k == "1"
-                then Json.Decode.succeed (GotoSlideNumber 5)
+                then Json.Decode.succeed (GotoSlideNumber 5 0)
                 else if k == "2"
-                then Json.Decode.succeed (GotoSlideNumber 10)
+                then Json.Decode.succeed (GotoSlideNumber 10 0)
                 else if k == "3"
-                then Json.Decode.succeed (GotoSlideNumber 15)
+                then Json.Decode.succeed (GotoSlideNumber 15 0)
                 else if k == "4"
-                then Json.Decode.succeed (GotoSlideNumber 20)
+                then Json.Decode.succeed (GotoSlideNumber 20 0)
                 else if k == "5"
-                then Json.Decode.succeed (GotoSlideNumber 25)
+                then Json.Decode.succeed (GotoSlideNumber 25 0)
                 else if k == "6"
-                then Json.Decode.succeed (GotoSlideNumber 30)
+                then Json.Decode.succeed (GotoSlideNumber 30 0)
                 else if k == "7"
-                then Json.Decode.succeed (GotoSlideNumber 35)
+                then Json.Decode.succeed (GotoSlideNumber 35 0)
                 else if k == "8"
-                then Json.Decode.succeed (GotoSlideNumber 40)
+                then Json.Decode.succeed (GotoSlideNumber 40 0)
                 else if k == "9"
-                then Json.Decode.succeed (GotoSlideNumber 45)
+                then Json.Decode.succeed (GotoSlideNumber 45 0)
                 else if k == "o"
                 then Json.Decode.succeed ToggleOverviewMode
                 else if k == "a"
@@ -108,11 +116,17 @@ handleKeys =
         )
 
 
-position2slideN : List (Slide Msg) -> Int -> Int
+position2slideN : List (Slide Msg) -> Int -> (Int, Int)
 position2slideN slides p =
-    List.take (p+1) slides
-        |> List.filter (\s -> s.slideType == FirstSlideInGroup)
-        |> List.length
+    let
+        first_n : List (Slide Msg)
+        first_n = List.take (p+1) slides
+        acc : Slide Msg -> (Int, Int) -> (Int, Int)
+        acc s (n, off) =
+            if s.slideType == FirstSlideInGroup
+            then (n+1, 0)
+            else (n, off+1)
+    in List.foldl acc (0, 0) first_n
 
 findIx slides ix =
     case slides of
@@ -131,9 +145,9 @@ update slides msg model = case msg of
             ( model, Cmd.none )
         NavTo s ->
             ( model, Nav.load s )
-        GotoSlideNumber ix ->
+        GotoSlideNumber ix d ->
             let
-                real_ix = findIx slides (ix - 1)
+                real_ix = d + findIx slides (ix - 1)
             in update slides (GotoPosition real_ix) model
         PopToPosition p -> update slides (GotoPosition p) { model | mode = SingleSlide }
         GotoPosition p ->
@@ -145,8 +159,8 @@ update slides msg model = case msg of
                     else if p >= n
                     then n - 1
                     else p
-                slide_n = position2slideN slides real_p
-                m = Nav.replaceUrl model.key ("#"++String.fromInt slide_n)
+                (slide_n, slide_off) = position2slideN slides real_p
+                m = Nav.replaceUrl model.key ("#"++String.fromInt slide_n ++ "." ++ String.fromInt slide_off)
             in ( {model | position = real_p}, m)
         NextSlide ->
             update slides (GotoPosition <| advance1 model) model
