@@ -14,7 +14,7 @@ import HtmlSimple as HS
 
 import Slides exposing (Slide, SlideType(..), SlideShow)
 import Content exposing (slides, metadata, options)
-import Content.Common exposing (twitterLink)
+import Content.Common exposing (bskyLink)
 
 {- The term `position` will refer to the internal counter (zero-based, indexes
  - into the slides list) and the term `slide number` will be the human readable
@@ -347,7 +347,7 @@ footer model =
                           ] []
                 , Html.strong [HtmlAttr.style "padding-right" "1em"]
                     [Html.text "Luis Pedro Coelho"]
-                ,twitterLink "luispedrocoelho"
+                ,bskyLink "luispedrocoelho.bsky.social"
                 ,case options.footerUrl of
                     Nothing -> Html.span [HtmlAttr.style "padding-right" "12em"] []
                     Just url ->
