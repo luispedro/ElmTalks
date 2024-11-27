@@ -1,4 +1,4 @@
-module Main exposing (main)
+module SlideShow exposing (mkSlideShow, ProgramType)
 
 import Html exposing (Html)
 import Html.Attributes as HtmlAttr
@@ -12,8 +12,7 @@ import Json.Decode exposing (Decoder)
 
 import HtmlSimple as HS
 
-import Slides exposing (Slide, SlideType(..), SlideShow)
-import Content exposing (slides, metadata)
+import Slides exposing (Slide, SlideType(..), SlideList)
 
 {- The term `position` will refer to the internal counter (zero-based, indexes
  - into the slides list) and the term `slide number` will be the human readable
@@ -43,19 +42,27 @@ type Msg
     | ToggleHelpMode
 
 
-main : Program () Model Msg
-main =
+type alias SlideContent =
+    { title : String
+    , slides : List (Slide Msg)
+    , mkFooter : Int -> Int -> Html Msg
+    }
+
+
+type alias ProgramType = Program () Model Msg
+mkSlideShow : SlideContent -> ProgramType
+mkSlideShow content =
     Browser.application
-        { init = init
-        , view = view
-        , update = update slides
+        { init = init content
+        , view = view content
+        , update = update content
         , subscriptions = \_ -> Browser.Events.onKeyUp handleKeys
         , onUrlRequest = onUrlRequest
         , onUrlChange = onUrlChange
         }
 
-init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init () u k =
+init : SlideContent -> () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init content () u k =
     let
         (islide, off) = case u.fragment of
            Nothing -> (1, 0)
@@ -70,7 +77,7 @@ init () u k =
                         (Just i, Just on) -> (i, on)
                         _ -> (1, 0)
                     _ -> (1, 0)
-    in update slides (GotoSlideNumber islide off) { position = 0, key = k, mode = SingleSlide }
+    in update content (GotoSlideNumber islide off) { position = 0, key = k, mode = SingleSlide }
 
 handleKeys : Decoder Msg
 handleKeys =
@@ -138,37 +145,37 @@ findIx slides ix =
                 else 1 + (findIx rest (ix - 1))
             else 1 + findIx rest ix
 
-update : List (Slide Msg) -> Msg -> Model -> ( Model, Cmd Msg )
-update slides msg model = case msg of
+update : SlideContent -> Msg -> Model -> ( Model, Cmd Msg )
+update content msg model = case msg of
         NoMsg ->
             ( model, Cmd.none )
         NavTo s ->
             ( model, Nav.load s )
         GotoSlideNumber ix d ->
             let
-                real_ix = d + findIx slides (ix - 1)
-            in update slides (GotoPosition real_ix) model
-        PopToPosition p -> update slides (GotoPosition p) { model | mode = SingleSlide }
+                real_ix = d + findIx content.slides (ix - 1)
+            in update content (GotoPosition real_ix) model
+        PopToPosition p -> update content (GotoPosition p) { model | mode = SingleSlide }
         GotoPosition p ->
             let
-                n = List.length slides
+                n = List.length content.slides
                 real_p =
                     if p < 0
                     then 0
                     else if p >= n
                     then n - 1
                     else p
-                (slide_n, slide_off) = position2slideN slides real_p
+                (slide_n, slide_off) = position2slideN content.slides real_p
                 m = Nav.replaceUrl model.key ("#"++String.fromInt slide_n ++ "." ++ String.fromInt slide_off)
             in ( {model | position = real_p}, m)
         NextSlide ->
-            update slides (GotoPosition <| advance1 model) model
+            update content (GotoPosition <| advance1 content.slides model) model
         PreviousSlide ->
-            update slides (GotoPosition <| previous1 model) model
+            update content (GotoPosition <| previous1 content.slides model) model
         LastSlide ->
-            update slides (GotoPosition (List.length slides - 1)) model
+            update content (GotoPosition (List.length content.slides - 1)) model
         FirstSlide ->
-            update slides (GotoPosition 0) model
+            update content (GotoPosition 0) model
         ToggleOverviewMode ->
             ( {model | mode = toggleOverviewMode model.mode}, Cmd.none )
         TogglePrintMode ->
@@ -193,20 +200,20 @@ toggleHelpMode m =
     then SingleSlide
     else Help
 
-advance1 : Model -> Int
-advance1 model =
+advance1 : SlideList Msg -> Model -> Int
+advance1 slides model =
     let n = model.position in
         if n + 1 >= List.length slides
             then n
             else n+1
 
-previous1 : Model -> Int
-previous1 model =
+previous1 : SlideList Msg -> Model -> Int
+previous1 slides model =
     if model.position > 0
     then model.position - 1
     else 0
 
-getSlide : Int -> SlideShow msg -> Slide msg
+getSlide : Int -> SlideList Msg -> Slide Msg
 getSlide n sl = case sl of
     (h :: rest) ->
         if n == 0
@@ -214,14 +221,16 @@ getSlide n sl = case sl of
         else getSlide (n-1) rest
     _ -> slideErr
 
-view model = case model.mode of
-    SingleSlide -> viewSingleSlide model
-    Overview -> viewPaged model
-    Print -> viewPrint model
-    Help -> viewHelp model
+view : SlideContent -> Model -> Browser.Document Msg
+view content model = case model.mode of
+    SingleSlide -> viewSingleSlide content model
+    Overview -> viewPaged content model
+    Print -> viewPrint content model
+    Help -> viewHelp content model
 
-viewPaged model =
-    { title = metadata.title
+viewPaged : SlideContent -> Model -> Browser.Document Msg
+viewPaged content model =
+    { title = content.title
     , body = let
                 v ix sl =
                     let
@@ -247,32 +256,33 @@ viewPaged model =
                         , HtmlAttr.style "left" "-600px"
                         , HtmlAttr.style "top" "-400px"
                         ]
-                        (List.indexedMap v slides)]
+                        (List.indexedMap v content.slides)]
     }
 
-viewPrint model =
-    { title = metadata.title
+viewPrint content model =
+    { title = content.title
     , body =
         [ header
         , Html.div
             [HtmlAttr.id "main-content"
             ,HtmlAttr.class "print-mode"
             ]
-            (List.map .content slides)
-        , footer metadata.mkFooter model
+            (List.map .content content.slides)
+        , footer content model
         ]
     }
 
-viewSingleSlide model =
+viewSingleSlide : SlideContent -> Model -> Browser.Document Msg
+viewSingleSlide content model =
     let
-        active : Slide msg
-        active = getSlide model.position slides
+        active : Slide Msg
+        active = getSlide model.position content.slides
     in
     if active.slideType == Slides.Special
-        then { title = metadata.title
+        then { title = content.title
             , body = [ Html.div [HtmlAttr.id "main-content"] [ active.content ] ]
         }
-        else { title = metadata.title
+        else { title = content.title
             , body = [
                 Html.div
                     [HtmlAttr.id "main-content"
@@ -280,14 +290,14 @@ viewSingleSlide model =
                     ]
                     [ header
                     , active.content
-                    , footer metadata.mkFooter model
+                    , footer content model
                     ]
                 ]
             }
 
-viewHelp model =
+viewHelp content model =
     let
-        base = viewSingleSlide model
+        base = viewSingleSlide content model
         helpOverlay =
             Html.div
                 [HtmlAttr.id "overlay"]
@@ -311,17 +321,17 @@ header =
         []
 
 
-footer : (Int -> Int -> Html Msg) -> Model -> Html Msg
-footer mkFooter model =
+footer : SlideContent -> Model -> Html Msg
+footer content model =
     let
         countFirst sl =
             sl
             |> List.filter (\s -> s.slideType == FirstSlideInGroup)
             |> List.length
-        cur = countFirst (List.take (model.position+1) slides)
-        total = countFirst slides
+        cur = countFirst (List.take (model.position+1) content.slides)
+        total = countFirst content.slides
     in
-        mkFooter cur total
+        content.mkFooter cur total
 
 slideErr : Slide msg
 slideErr =

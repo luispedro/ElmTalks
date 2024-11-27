@@ -2,7 +2,7 @@ module Slides exposing
     ( RawSlide(..)
     , Slide
     , SlideType(..)
-    , SlideShow
+    , SlideList
 
     , mkSlide
     , mkIncrementalSlide
@@ -29,7 +29,7 @@ type alias Slide msg =
     { content : Html msg
     , slideType : SlideType
     }
-type alias SlideShow msg = List (Slide msg)
+type alias SlideList msg = List (Slide msg)
 
 type RawSlide msg = RawSlide (Slide msg) | RawSlideGroup (List (Slide msg)) | RawExtraSlides (List (Slide msg))
 
