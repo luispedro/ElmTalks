@@ -13,8 +13,7 @@ import Json.Decode exposing (Decoder)
 import HtmlSimple as HS
 
 import Slides exposing (Slide, SlideType(..), SlideShow)
-import Content exposing (slides, metadata, options)
-import Content.Common exposing (bskyLink)
+import Content exposing (slides, metadata)
 
 {- The term `position` will refer to the internal counter (zero-based, indexes
  - into the slides list) and the term `slide number` will be the human readable
@@ -260,7 +259,7 @@ viewPrint model =
             ,HtmlAttr.class "print-mode"
             ]
             (List.map .content slides)
-        , footer model
+        , footer metadata.mkFooter model
         ]
     }
 
@@ -281,7 +280,7 @@ viewSingleSlide model =
                     ]
                     [ header
                     , active.content
-                    , footer model
+                    , footer metadata.mkFooter model
                     ]
                 ]
             }
@@ -312,8 +311,8 @@ header =
         []
 
 
-footer : Model -> Html Msg
-footer model =
+footer : (Int -> Int -> Html Msg) -> Model -> Html Msg
+footer mkFooter model =
     let
         countFirst sl =
             sl
@@ -322,49 +321,7 @@ footer model =
         cur = countFirst (List.take (model.position+1) slides)
         total = countFirst slides
     in
-        Html.div
-            [HtmlAttr.id "footer"]
-            [ Html.div
-                [HtmlAttr.style "position" "absolute"
-                ,HtmlAttr.style "width" "10%"
-                ,HtmlAttr.style "left" "94vw"
-                ,HtmlAttr.style "top" "-40px"
-                ]
-                [Html.img
-                        [HtmlAttr.src "/Media/bdb-logo_128px.png"
-                        ,HtmlAttr.style "width" "72px"
-                        ] []
-                ]
-            ,Html.p [
-                HtmlAttr.style "padding-right" "56px"
-                ]
-                [Html.img [ HtmlAttr.src "/Media/qut-logo-blue_bg.png"
-                          , HtmlAttr.style "height" "80px"
-                          , HtmlAttr.style "margin-top" "-40px"
-                          , HtmlAttr.style "margin-bottom" "-20px"
-                          , HtmlAttr.style "margin-left" "-30px"
-                          , HtmlAttr.style "margin-right" "10px"
-                          ] []
-                , Html.strong [HtmlAttr.style "padding-right" "1em"]
-                    [Html.text "Luis Pedro Coelho"]
-                ,bskyLink "luispedrocoelho.bsky.social"
-                ,case options.footerUrl of
-                    Nothing -> Html.span [HtmlAttr.style "padding-right" "12em"] []
-                    Just url ->
-                        Html.span [HtmlAttr.style "padding-left" "9em"]
-                            [HS.textA url url]
-
-                ,Html.span [HtmlAttr.style "padding-right" "8em"] []
-                ,Html.text metadata.shortTitle
-                ,Html.text " ["
-                ,Html.text (String.fromInt cur)
-                ,Html.text <|
-                    if options.includeTotalNrSlides
-                        then "/" ++ String.fromInt total ++ "]"
-                        else "]"
-                ]
-            ]
-
+        mkFooter cur total
 
 slideErr : Slide msg
 slideErr =
