@@ -64,13 +64,10 @@ addStartingSlash s =
     else s
 
 imgw w src =
-    Html.div
-        [HtmlAttr.style "text-align" "center"]
-        [Html.img
+        Html.img
             [HtmlAttr.src (addStartingSlash src)
             ,HtmlAttr.style "width" w]
             []
-        ]
 p t = Html.p [] [Html.text t]
 h1 t = Html.h1 [] [Html.text t]
 h2 t = Html.h2 [] [Html.text t]
