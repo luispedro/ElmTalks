@@ -14,6 +14,10 @@ module HtmlSimple exposing
         , h1
         , h2
         , h3
+        , textA
+
+        , underline
+        , padTop1
 
         , mdToHtml
         )
@@ -71,6 +75,12 @@ p t = Html.p [] [Html.text t]
 h1 t = Html.h1 [] [Html.text t]
 h2 t = Html.h2 [] [Html.text t]
 h3 t = Html.h3 [] [Html.text t]
+
+
+textA url t = Html.a [HtmlAttr.href url] [Html.text t]
+
+underline = HtmlAttr.style "text-decoration" "underline"
+padTop1 = HtmlAttr.style "padding-top" "1em"
 
 markdownOptions =
     { githubFlavored = Just { tables = True, breaks = False }
