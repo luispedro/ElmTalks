@@ -159,12 +159,7 @@ update content msg model = case msg of
         GotoPosition p ->
             let
                 n = List.length content.slides
-                real_p =
-                    if p < 0
-                    then 0
-                    else if p >= n
-                    then n - 1
-                    else p
+                real_p = clamp 0 (n-1) p
                 (slide_n, slide_off) = position2slideN content.slides real_p
                 m = Nav.replaceUrl model.key ("#"++String.fromInt slide_n ++ "." ++ String.fromInt slide_off)
             in ( {model | position = real_p}, m)
