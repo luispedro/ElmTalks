@@ -38,3 +38,26 @@ main =
 ```
 
 Running the example and opening the generated `index.html` will display a two slide presentation.
+
+## Slides, RawSlides, and Cooking
+
+Slide content is defined using the `Slides` module.  A `RawSlide` represents the
+unprocessed form of a slide.  It can be a single slide, a group of slides (for
+incremental or stepped content), or a collection of extra slides that are moved
+to the end.  The `cookSlides` function converts a list of `RawSlide` values into
+the plain `Slide` list consumed by `mkSlideShow`.
+
+## Footer Arguments
+
+The `mkFooter` field of `mkSlideShow` takes a function that receives two
+arguments: the current slide number and the total number of slides.  This
+function returns the `Html` that should appear at the bottom of every slide,
+allowing you to customise the footer layout or omit it entirely.
+
+## HtmlSimple Utilities
+
+Elm Talks ships with a small utility module named `HtmlSimple`.  It contains
+convenience functions for building slide content, such as helpers for floating
+elements, sized images, simple lists, and converting Markdown to HTML.  Import
+`HtmlSimple` when you want to lean on these utilities instead of writing the
+markup by hand.
