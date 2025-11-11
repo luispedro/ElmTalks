@@ -4,9 +4,9 @@ from os import makedirs, path
 from sys import argv
 from glob import glob
 
-pat = re.compile(f'\/?Media\/(?P<mid>.*)(?P<name>.*)\.(?P<ext>[^\'"]*)')
-pat_stepped = re.compile(f'\/?Media\/(?P<mid>.*)(?P<name>.*)_stepped-')
-pat_fromString = re.compile(f"' \+ \(\$elm\$core\$String\$fromInt\(.+\) \+ '")
+pat = re.compile(r'\/?Media\/(?P<mid>.*)(?P<name>.*)\.(?P<ext>[^\'"]*)')
+pat_stepped = re.compile(r'\/?Media\/(?P<mid>.*)(?P<name>.*)_stepped-')
+pat_fromString = re.compile(r"' \+ \(\$elm\$core\$String\$fromInt\(.+\) \+ '")
 
 if len(argv) >= 2:
     target = argv[1]
