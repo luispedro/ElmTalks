@@ -8,6 +8,8 @@ module Slides exposing
     , mkIncrementalSlide
     , mkSteppedSlide
 
+    , compressToLast
+
     , cookSlides
     , skipSlide
     , mkExtra
@@ -69,6 +71,22 @@ mkIncrementalSlide title parts =
             mkSlideSimple title (List.concat (List.take ix parts)))
     |> tagSlideGroup
     |> RawSlideGroup
+
+{- Compress a RawSlide to only keep the last slide in it
+ - Example usage:
+    -   compressToLast <| mkSteppedSlide "Title" [[..], [..], ..]
+-}
+compressToLast : RawSlide msg -> RawSlide msg
+compressToLast s = case s of
+    RawSlide sl -> s
+    RawSlideGroup sls ->
+        case List.reverse sls of
+            [] -> s
+            (last :: _) -> RawSlide last
+    RawExtraSlides sls ->
+        case List.reverse sls of
+            [] -> s
+            (last :: _) -> RawExtraSlides [last]
 
 cookSlides : List (RawSlide msg) -> List (Slide msg)
 cookSlides slides =
