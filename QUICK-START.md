@@ -71,11 +71,11 @@ elm make src/Main.elm --optimize
 ```
 
 
-Step 6 (alternative): Build your project for production using `ElmTasks/build.sh` and `copy-media-files.py`:
+Step 6 (alternative): Build your project for production using `ElmTasks/build.sh` and `copy-Media-files.py`:
 
 ```bash
 cp -pir ElmTalks/build.sh .
-cp -pir ElmTalks/copy-media-files.py .
+cp -pir ElmTalks/copy-Media-files.py .
 ./build.sh
 ```
 
