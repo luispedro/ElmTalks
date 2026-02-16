@@ -6,7 +6,12 @@ Elm Talks is a lightweight presentation framework written in [Elm](https://elm-l
 
 Run `./build.sh` to compile the sources and produce a `dist` directory containing `index.html` and assets. The build script invokes `elm make` and copies media files.
 
-To start a new project, see the [Quick Start Guide](QUICK-START.md).
+To start a new project, see the [Quick Start Guide](QUICK-START.md) or run the following in an empty directory to set everything up automatically:
+
+```bash
+mkdir my-presentation && cd my-presentation
+curl -sL https://raw.githubusercontent.com/luispedro/ElmTalks/main/quick-start.sh | bash
+```
 
 ## Example
 

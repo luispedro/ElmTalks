@@ -2,6 +2,13 @@
 
 This is a quick start guide to create your own presentation using ElmTalks.
 
+Alternatively, you can run the `quick-start.sh` script in an empty directory to automate all the steps below:
+
+```bash
+mkdir my-presentation && cd my-presentation
+curl -sL https://raw.githubusercontent.com/luispedro/ElmTalks/main/quick-start.sh | bash
+```
+
 Step 0: Install [Elm](https://elm-lang.org/). This you need to do on your own.
 
 Step 1: Create a new Elm project and install dependencies (which will be used by ElmTalks):
