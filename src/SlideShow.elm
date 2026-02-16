@@ -134,6 +134,7 @@ position2slideN slides p =
             else (n, off+1)
     in List.foldl acc (0, 0) first_n
 
+findIx : SlideList Msg -> Int -> Int
 findIx slides ix =
     case slides of
         [] -> 0
