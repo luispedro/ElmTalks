@@ -199,7 +199,7 @@ toggleHelpMode m =
 advance1 : SlideList Msg -> Model -> Int
 advance1 slides model =
     let n = model.position in
-        if n + 1 >= List.length slides
+        if List.isEmpty <| List.drop (n+1) slides
             then n
             else n+1
 
