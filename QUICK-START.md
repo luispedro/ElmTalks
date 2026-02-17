@@ -78,7 +78,7 @@ elm make src/Main.elm --optimize
 ```
 
 
-Step 6 (alternative): Build your project for production using `ElmTasks/build.sh` and `copy-Media-files.py`:
+Step 6 (alternative): Build your project for production using `ElmTalks/build.sh` and `copy-Media-files.py`:
 
 ```bash
 cp -pir ElmTalks/build.sh .
@@ -86,5 +86,5 @@ cp -pir ElmTalks/copy-Media-files.py .
 ./build.sh
 ```
 
-This will create a `build` folder with an optimized `index.html` and `main.js` file, along with the necessary media files which are copied from `Media/`.
+This will create a `dist` folder with an optimized `index.html` and `main.js` file, along with the necessary media files which are copied from `Media/`.
 
