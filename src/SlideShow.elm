@@ -402,14 +402,21 @@ viewSpeaker content model =
         active = getSlide model.position content.slides
         upcoming =
             List.range 1 4
-                |> List.map (\d -> getSlideMaybe (model.position + d) content.slides)
-        previewThumb mslide =
-            Html.div
-                [HtmlAttr.class "speaker-thumb speaker-thumb-preview"]
-                [ case mslide of
-                    Just s -> s.content
-                    Nothing -> Html.div [HtmlAttr.class "speaker-empty"] [Html.text "—"]
-                ]
+                |> List.map (\d ->
+                        let pos = model.position + d
+                        in (pos, getSlideMaybe pos content.slides))
+        previewThumb (pos, mslide) =
+            case mslide of
+                Just s ->
+                    Html.div
+                        [HtmlAttr.class "speaker-thumb speaker-thumb-preview speaker-thumb-clickable"
+                        ,onClick (GotoPosition pos)
+                        ]
+                        [ s.content ]
+                Nothing ->
+                    Html.div
+                        [HtmlAttr.class "speaker-thumb speaker-thumb-preview"]
+                        [ Html.div [HtmlAttr.class "speaker-empty"] [Html.text "—"] ]
         countFirst sl =
             sl
             |> List.filter (\s -> s.slideType == FirstSlideInGroup)

@@ -221,6 +221,16 @@ DIV.speaker-thumb-preview > DIV.slide {
     transform: scale(var(--thumb-preview-scale));
 }
 
+DIV.speaker-thumb-clickable {
+    cursor: pointer;
+    transition: border-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+DIV.speaker-thumb-clickable:hover {
+    border-color: #005a32;
+    box-shadow: 0 3px 10px rgba(0,90,50,0.25);
+}
+
 DIV.speaker-empty {
     width: 100%;
     height: 100%;
