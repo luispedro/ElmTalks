@@ -400,17 +400,15 @@ viewSpeaker : SlideContent -> Model -> Browser.Document Msg
 viewSpeaker content model =
     let
         active = getSlide model.position content.slides
-        next1 = getSlideMaybe (model.position + 1) content.slides
-        next2 = getSlideMaybe (model.position + 2) content.slides
-        previewBox label mslide =
+        upcoming =
+            List.range 1 4
+                |> List.map (\d -> getSlideMaybe (model.position + d) content.slides)
+        previewThumb mslide =
             Html.div
-                [HtmlAttr.class "speaker-preview"]
-                [ Html.div [HtmlAttr.class "speaker-preview-label"] [Html.text label]
-                , Html.div [HtmlAttr.class "speaker-preview-frame"]
-                    [ case mslide of
-                        Just s -> s.content
-                        Nothing -> Html.div [HtmlAttr.class "speaker-empty"] [Html.text "(end)"]
-                    ]
+                [HtmlAttr.class "speaker-thumb speaker-thumb-preview"]
+                [ case mslide of
+                    Just s -> s.content
+                    Nothing -> Html.div [HtmlAttr.class "speaker-empty"] [Html.text "—"]
                 ]
         countFirst sl =
             sl
@@ -435,14 +433,21 @@ viewSpeaker content model =
         , Html.div
             [HtmlAttr.class "speaker-view"]
             [ Html.div
-                [HtmlAttr.class "speaker-current"]
-                [ Html.div [HtmlAttr.class "speaker-current-frame"]
-                    [ active.content ]
-                ]
-            , Html.div
-                [HtmlAttr.class "speaker-side"]
-                [ previewBox "Next" next1
-                , previewBox "After" next2
+                [HtmlAttr.class "speaker-stage"]
+                [ Html.div
+                    [HtmlAttr.class "speaker-slot speaker-slot-current"]
+                    [ Html.div [HtmlAttr.class "speaker-slot-label"] [Html.text "Now"]
+                    , Html.div
+                        [HtmlAttr.class "speaker-thumb speaker-thumb-current"]
+                        [ active.content ]
+                    ]
+                , Html.div
+                    [HtmlAttr.class "speaker-slot speaker-slot-upcoming"]
+                    [ Html.div [HtmlAttr.class "speaker-slot-label"] [Html.text "Up Next"]
+                    , Html.div
+                        [HtmlAttr.class "speaker-upcoming-grid"]
+                        (List.map previewThumb upcoming)
+                    ]
                 ]
             , Html.div
                 [HtmlAttr.class "speaker-footer"]

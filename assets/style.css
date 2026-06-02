@@ -1,3 +1,8 @@
+HTML, BODY {
+    margin: 0;
+    padding: 0;
+}
+
 DIV.slide {
     clear: both;
     margin-left: 2vw;
@@ -117,118 +122,154 @@ TABLE TD {
   background-color: rgba(255,255,195,0.9);
 }
 
+/* ---- Speaker view ----
+ * Slide thumbnails are scaled via `transform: scale(--s)`. Because the
+ * underlying .slide is sized in viewport units (96vw x 90vh), the wrapper
+ * width/height are pinned to (96 * s)vw and (90 * s)vh so the visible scaled
+ * region exactly fills the wrapper at any viewport. Chrome (labels, timer,
+ * button) uses vmin so it shrinks on smaller screens too. The outermost
+ * .speaker-view sets overflow:hidden as a hard guarantee against scrollbars.
+ */
 DIV.speaker-view {
-    display: grid;
-    grid-template-columns: 65vw 32vw;
-    grid-template-rows: 88vh 8vh;
-    grid-template-areas:
-        "current side"
-        "footer  footer";
-    gap: 1vh 1vw;
-    padding: 1vh 1vw;
-    box-sizing: border-box;
+    --thumb-current-scale: 0.48;
+    --thumb-preview-scale: 0.23;
+
+    display: flex;
+    flex-direction: column;
     width: 100vw;
     height: 100vh;
-}
-
-DIV.speaker-current {
-    grid-area: current;
-    border: 1px solid #005a32;
-    position: relative;
+    padding: 2vh 1.5vw;
+    box-sizing: border-box;
+    background: #fafafa;
     overflow: hidden;
+    gap: 1.4vh;
 }
 
-DIV.speaker-current-frame {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 96vw;
-    height: 90vh;
-    transform: scale(0.65);
-    transform-origin: top left;
-}
-
-DIV.speaker-side {
-    grid-area: side;
+DIV.speaker-stage {
     display: flex;
-    flex-direction: column;
-    gap: 1vh;
-    min-height: 0;
-}
-
-DIV.speaker-preview {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 2vw;
     flex: 1;
-    border: 1px solid #005a32;
+    min-height: 0;
+    overflow: hidden;
+}
+
+DIV.speaker-upcoming-grid {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    grid-template-rows: repeat(2, auto);
+    gap: 0.9vh 0.9vw;
+}
+
+DIV.speaker-slot {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    align-items: flex-start;
+    gap: 0.6vh;
     min-height: 0;
 }
 
-DIV.speaker-preview-label {
+DIV.speaker-slot-label {
     font-family: sans-serif;
+    font-size: 1.6vmin;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #888;
+}
+
+DIV.speaker-slot-current > DIV.speaker-slot-label {
     color: #005a32;
     font-weight: bold;
-    padding: 0.3em 0.6em;
-    border-bottom: 1px solid #005a32;
-    flex: none;
 }
 
-DIV.speaker-preview-frame {
-    flex: 1;
+DIV.speaker-thumb {
     position: relative;
     overflow: hidden;
+    background: white;
+    border-radius: 3px;
+    box-sizing: border-box;
 }
 
-DIV.speaker-preview-frame > DIV.slide {
+DIV.speaker-thumb > DIV.slide {
     position: absolute;
     top: 0;
     left: 0;
     margin: 0;
-    transform: scale(0.32);
     transform-origin: top left;
 }
 
+DIV.speaker-thumb-current {
+    width: calc(96vw * var(--thumb-current-scale));
+    height: calc(90vh * var(--thumb-current-scale));
+    border: 2px solid #005a32;
+    box-shadow: 0 3px 12px rgba(0,90,50,0.18);
+}
+
+DIV.speaker-thumb-current > DIV.slide {
+    transform: scale(var(--thumb-current-scale));
+}
+
+DIV.speaker-thumb-preview {
+    width: calc(96vw * var(--thumb-preview-scale));
+    height: calc(90vh * var(--thumb-preview-scale));
+    border: 1px solid #bbb;
+}
+
+DIV.speaker-thumb-preview > DIV.slide {
+    transform: scale(var(--thumb-preview-scale));
+}
+
 DIV.speaker-empty {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    color: #888;
+    color: #aaa;
     font-family: sans-serif;
     font-style: italic;
+    font-size: 1.5vmin;
+    background: #f0f0f0;
 }
 
 DIV.speaker-footer {
-    grid-area: footer;
     display: flex;
     align-items: center;
-    gap: 2em;
-    padding: 0 1em;
-    border-top: 1px solid #005a32;
+    justify-content: center;
+    gap: 4em;
+    padding: 1.2vh 1em 0 1em;
+    border-top: 1px solid #ddd;
     font-family: sans-serif;
+    flex: none;
 }
 
 SPAN.speaker-counter {
-    font-size: 130%;
+    font-size: 2.6vmin;
     color: #005a32;
+    font-weight: bold;
+    min-width: 6em;
+    text-align: center;
 }
 
 SPAN.speaker-timer {
     font-family: monospace;
-    font-size: 200%;
+    font-size: 5.5vmin;
     color: #005a32;
+    font-weight: bold;
+    letter-spacing: 0.05em;
 }
 
 BUTTON.speaker-reset {
-    margin-left: auto;
     font-family: sans-serif;
-    padding: 0.4em 1em;
+    padding: 0.5em 1.4em;
     background: #005a32;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    font-size: 1.8vmin;
 }
 
 BUTTON.speaker-reset:hover {
