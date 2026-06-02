@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElmTalks Presentation</title>
+    <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+    <script src="main.js"></script>
+    <script>
+        var app = Elm.Main.init();
+
+        // Cross-window sync between audience and speaker views.
+        // Both windows publish their position to the channel; both subscribe.
+        // The Elm side guards against echo by only broadcasting on local
+        // (non-remote) navigation that actually changes position.
+        try {
+            var channel = new BroadcastChannel('elmtalks');
+            if (app.ports && app.ports.broadcastPosition) {
+                app.ports.broadcastPosition.subscribe(function (p) {
+                    channel.postMessage(p);
+                });
+            }
+            if (app.ports && app.ports.receivePosition) {
+                channel.onmessage = function (e) {
+                    app.ports.receivePosition.send(e.data);
+                };
+            }
+        } catch (err) {
+            console.warn('BroadcastChannel unavailable; speaker/audience sync disabled.', err);
+        }
+
+        // Open the speaker view in a new tab, preserving the current slide.
+        if (app.ports && app.ports.openSpeakerWindow) {
+            app.ports.openSpeakerWindow.subscribe(function () {
+                var loc = window.location;
+                var hash = loc.hash.replace(/^#/, '').replace(/^s\//, '');
+                var url = loc.pathname + loc.search + '#s/' + (hash || '1.0');
+                window.open(url, '_blank');
+            });
+        }
+    </script>
+</body>
+</html>

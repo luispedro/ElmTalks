@@ -15,7 +15,7 @@ else:
 
 makedirs(f'{target}/Media/', exist_ok=True)
 
-with open(f'{target}/index.html', 'r') as ifile:
+with open(f'{target}/main.js', 'r') as ifile:
     for line in ifile:
         if m := pat.search(line):
             f = m.group(0)

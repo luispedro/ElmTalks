@@ -1,4 +1,4 @@
-module SlideShow exposing (mkSlideShow, ProgramType)
+port module SlideShow exposing (mkSlideShow, ProgramType)
 
 import Html exposing (Html)
 import Html.Attributes as HtmlAttr
@@ -9,6 +9,8 @@ import Browser.Events
 import Browser.Navigation as Nav
 import Url
 import Json.Decode exposing (Decoder)
+import Task
+import Time
 
 import HtmlSimple as HS
 
@@ -16,14 +18,28 @@ import Slides exposing (Slide, SlideType(..), SlideList)
 
 {- The term `position` will refer to the internal counter (zero-based, indexes
  - into the slides list) and the term `slide number` will be the human readable
- - version (one-based, counts by groups)
+ - version (one-based, counts by groups).
+ -
+ - The URL fragment encodes both the window role and the current location:
+ -     #N     or #N.O      -- audience view, slide N (optional offset O)
+ -     #s/N   or #s/N.O    -- speaker view, slide N (optional offset O)
  -}
 
+port broadcastPosition : Int -> Cmd msg
+port receivePosition : (Int -> msg) -> Sub msg
+port openSpeakerWindow : () -> Cmd msg
+
+
 type Mode = SingleSlide | Overview | Print | Help
+type WindowRole = Audience | Speaker
+
 type alias Model =
     { position : Int
     , key : Nav.Key
     , mode : Mode
+    , role : WindowRole
+    , timerStart : Time.Posix
+    , now : Time.Posix
     }
 
 
@@ -32,6 +48,7 @@ type Msg
     | NavTo String
     | GotoSlideNumber Int Int
     | GotoPosition Int
+    | RemoteGotoPosition Int
     | PopToPosition Int
     | NextSlide
     | PreviousSlide
@@ -40,6 +57,10 @@ type Msg
     | ToggleOverviewMode
     | TogglePrintMode
     | ToggleHelpMode
+    | OpenSpeaker
+    | Tick Time.Posix
+    | InitTime Time.Posix
+    | ResetTimer
 
 
 type alias SlideContent =
@@ -56,28 +77,62 @@ mkSlideShow content =
         { init = init content
         , view = view content
         , update = update content
-        , subscriptions = \_ -> Browser.Events.onKeyUp handleKeys
+        , subscriptions = subscriptions
         , onUrlRequest = onUrlRequest
         , onUrlChange = onUrlChange
         }
 
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    let
+        base =
+            [ Browser.Events.onKeyUp handleKeys
+            , receivePosition RemoteGotoPosition
+            ]
+        timer = case model.role of
+            Speaker -> [ Time.every 1000 Tick ]
+            Audience -> []
+    in Sub.batch (base ++ timer)
+
+
+parseFragment : Maybe String -> ( WindowRole, Int, Int )
+parseFragment mf = case mf of
+    Nothing -> (Audience, 1, 0)
+    Just f ->
+        let
+            (role, rest) =
+                if String.startsWith "s/" f
+                then (Speaker, String.dropLeft 2 f)
+                else (Audience, f)
+            (i, o) = case String.split "." rest of
+                [s] -> case String.toInt s of
+                    Just n -> (n, 0)
+                    Nothing -> (1, 0)
+                [s, ofs] -> case (String.toInt s, String.toInt ofs) of
+                    (Just n, Just on) -> (n, on)
+                    _ -> (1, 0)
+                _ -> (1, 0)
+        in (role, i, o)
+
+
 init : SlideContent -> () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init content () u k =
     let
-        (islide, off) = case u.fragment of
-           Nothing -> (1, 0)
-           Just f ->
-               let
-                    tokens = String.split "." f
-               in case tokens of
-                    [s] -> case String.toInt s
-                        of Just i -> (i, 0)
-                           Nothing -> (1, 0)
-                    [s, o] -> case (String.toInt s, String.toInt o) of
-                        (Just i, Just on) -> (i, on)
-                        _ -> (1, 0)
-                    _ -> (1, 0)
-    in update content (GotoSlideNumber islide off) { position = 0, key = k, mode = SingleSlide }
+        (role, islide, off) = parseFragment u.fragment
+        epoch = Time.millisToPosix 0
+        model0 =
+            { position = 0
+            , key = k
+            , mode = SingleSlide
+            , role = role
+            , timerStart = epoch
+            , now = epoch
+            }
+        (model1, cmd1) = update content (GotoSlideNumber islide off) model0
+        initTimeCmd = Task.perform InitTime Time.now
+    in ( model1, Cmd.batch [cmd1, initTimeCmd] )
+
 
 handleKeys : Decoder Msg
 handleKeys =
@@ -118,6 +173,10 @@ handleKeys =
                 then Json.Decode.succeed TogglePrintMode
                 else if k == "?"
                 then Json.Decode.succeed ToggleHelpMode
+                else if k == "s" || k == "S"
+                then Json.Decode.succeed OpenSpeaker
+                else if k == "r" || k == "R"
+                then Json.Decode.succeed ResetTimer
                 else Json.Decode.fail "Unknown key"
         )
 
@@ -146,6 +205,30 @@ findIx slides ix =
                 else 1 + (findIx rest (ix - 1))
             else 1 + findIx rest ix
 
+
+fragmentFor : WindowRole -> Int -> Int -> String
+fragmentFor role slide_n slide_off =
+    let
+        prefix = case role of
+            Speaker -> "#s/"
+            Audience -> "#"
+    in prefix ++ String.fromInt slide_n ++ "." ++ String.fromInt slide_off
+
+
+setPosition : SlideContent -> Bool -> Int -> Model -> ( Model, Cmd Msg )
+setPosition content broadcast p model =
+    let
+        n = List.length content.slides
+        real_p = clamp 0 (n-1) p
+        (slide_n, slide_off) = position2slideN content.slides real_p
+        urlCmd = Nav.replaceUrl model.key (fragmentFor model.role slide_n slide_off)
+        broadcastCmd =
+            if broadcast && real_p /= model.position
+            then broadcastPosition real_p
+            else Cmd.none
+    in ( {model | position = real_p}, Cmd.batch [urlCmd, broadcastCmd] )
+
+
 update : SlideContent -> Msg -> Model -> ( Model, Cmd Msg )
 update content msg model = case msg of
         NoMsg ->
@@ -155,29 +238,37 @@ update content msg model = case msg of
         GotoSlideNumber ix d ->
             let
                 real_ix = d + findIx content.slides (ix - 1)
-            in update content (GotoPosition real_ix) model
-        PopToPosition p -> update content (GotoPosition p) { model | mode = SingleSlide }
+            in setPosition content True real_ix model
+        PopToPosition p ->
+            setPosition content True p { model | mode = SingleSlide }
         GotoPosition p ->
-            let
-                n = List.length content.slides
-                real_p = clamp 0 (n-1) p
-                (slide_n, slide_off) = position2slideN content.slides real_p
-                m = Nav.replaceUrl model.key ("#"++String.fromInt slide_n ++ "." ++ String.fromInt slide_off)
-            in ( {model | position = real_p}, m)
+            setPosition content True p model
+        RemoteGotoPosition p ->
+            setPosition content False p model
         NextSlide ->
-            update content (GotoPosition <| advance1 content.slides model) model
+            setPosition content True (advance1 content.slides model) model
         PreviousSlide ->
-            update content (GotoPosition <| previous1 content.slides model) model
+            setPosition content True (previous1 content.slides model) model
         LastSlide ->
-            update content (GotoPosition (List.length content.slides - 1)) model
+            setPosition content True (List.length content.slides - 1) model
         FirstSlide ->
-            update content (GotoPosition 0) model
+            setPosition content True 0 model
         ToggleOverviewMode ->
             ( {model | mode = toggleOverviewMode model.mode}, Cmd.none )
         TogglePrintMode ->
             ( {model | mode = togglePrintMode model.mode }, Cmd.none )
         ToggleHelpMode ->
             ( {model | mode = toggleHelpMode model.mode }, Cmd.none )
+        OpenSpeaker -> case model.role of
+            Audience -> ( model, openSpeakerWindow () )
+            Speaker -> ( model, Cmd.none )
+        Tick t ->
+            ( {model | now = t}, Cmd.none )
+        InitTime t ->
+            ( {model | now = t, timerStart = t}, Cmd.none )
+        ResetTimer ->
+            ( {model | timerStart = model.now}, Cmd.none )
+
 
 toggleOverviewMode : Mode -> Mode
 toggleOverviewMode m =
@@ -217,12 +308,25 @@ getSlide n sl = case sl of
         else getSlide (n-1) rest
     _ -> slideErr
 
+getSlideMaybe : Int -> SlideList Msg -> Maybe (Slide Msg)
+getSlideMaybe n sl =
+    if n < 0
+    then Nothing
+    else case sl of
+        [] -> Nothing
+        (h :: rest) ->
+            if n == 0
+            then Just h
+            else getSlideMaybe (n-1) rest
+
 view : SlideContent -> Model -> Browser.Document Msg
-view content model = case model.mode of
-    SingleSlide -> viewSingleSlide content model
-    Overview -> viewPaged content model
-    Print -> viewPrint content model
-    Help -> viewHelp content model
+view content model = case model.role of
+    Speaker -> viewSpeaker content model
+    Audience -> case model.mode of
+        SingleSlide -> viewSingleSlide content model
+        Overview -> viewPaged content model
+        Print -> viewPrint content model
+        Help -> viewHelp content model
 
 viewPaged : SlideContent -> Model -> Browser.Document Msg
 viewPaged content model =
@@ -291,6 +395,72 @@ viewSingleSlide content model =
                 ]
             }
 
+
+viewSpeaker : SlideContent -> Model -> Browser.Document Msg
+viewSpeaker content model =
+    let
+        active = getSlide model.position content.slides
+        next1 = getSlideMaybe (model.position + 1) content.slides
+        next2 = getSlideMaybe (model.position + 2) content.slides
+        previewBox label mslide =
+            Html.div
+                [HtmlAttr.class "speaker-preview"]
+                [ Html.div [HtmlAttr.class "speaker-preview-label"] [Html.text label]
+                , Html.div [HtmlAttr.class "speaker-preview-frame"]
+                    [ case mslide of
+                        Just s -> s.content
+                        Nothing -> Html.div [HtmlAttr.class "speaker-empty"] [Html.text "(end)"]
+                    ]
+                ]
+        countFirst sl =
+            sl
+            |> List.filter (\s -> s.slideType == FirstSlideInGroup)
+            |> List.length
+        cur = countFirst (List.take (model.position+1) content.slides)
+        total = countFirst content.slides
+        elapsedMs =
+            Time.posixToMillis model.now - Time.posixToMillis model.timerStart
+        elapsedSec = max 0 (elapsedMs // 1000)
+        mm = elapsedSec // 60
+        ss = modBy 60 elapsedSec
+        pad2 i =
+            if i < 10
+            then "0" ++ String.fromInt i
+            else String.fromInt i
+        timerText = pad2 mm ++ ":" ++ pad2 ss
+    in
+    { title = "Speaker — " ++ content.title
+    , body =
+        [ header
+        , Html.div
+            [HtmlAttr.class "speaker-view"]
+            [ Html.div
+                [HtmlAttr.class "speaker-current"]
+                [ Html.div [HtmlAttr.class "speaker-current-frame"]
+                    [ active.content ]
+                ]
+            , Html.div
+                [HtmlAttr.class "speaker-side"]
+                [ previewBox "Next" next1
+                , previewBox "After" next2
+                ]
+            , Html.div
+                [HtmlAttr.class "speaker-footer"]
+                [ Html.span [HtmlAttr.class "speaker-counter"]
+                    [Html.text (String.fromInt cur ++ " / " ++ String.fromInt total)]
+                , Html.span [HtmlAttr.class "speaker-timer"]
+                    [Html.text timerText]
+                , Html.button
+                    [HtmlAttr.class "speaker-reset"
+                    ,onClick ResetTimer
+                    ]
+                    [Html.text "Reset"]
+                ]
+            ]
+        ]
+    }
+
+
 viewHelp content model =
     let
         base = viewSingleSlide content model
@@ -304,6 +474,8 @@ viewHelp content model =
 - `K`/`P`/`ArrowLeft`: previous
 - `O`: toggle overview mode
 - `A`: toggle print mode (short for _All_)
+- `S`: open speaker view in a new window
+- `R`: reset elapsed-time timer (speaker view)
 - `?`: toggle help mode"""]
     in { base | body = helpOverlay :: base.body }
 
@@ -341,5 +513,4 @@ onUrlRequest urlR = case urlR of
 
 onUrlChange : Url.Url -> Msg
 onUrlChange u = NoMsg
-
 

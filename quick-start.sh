@@ -28,6 +28,7 @@ echo y | elm init
 echo "==> Installing Elm dependencies..."
 echo y | elm install elm/url
 echo y | elm install elm/json
+echo y | elm install elm/time
 echo y | elm install elm-explorations/markdown
 
 # --- Step 2: Add ElmTalks as a git submodule & copy assets ---
@@ -80,10 +81,11 @@ main = mkSlideShow
             }
 ELMEOF
 
-# --- Step 5: Copy build helpers ---
-echo "==> Copying build scripts..."
+# --- Step 5: Copy build helpers and HTML shell ---
+echo "==> Copying build scripts and index.html..."
 cp -p ElmTalks/build.sh .
 cp -p ElmTalks/copy-Media-files.py .
+cp -p ElmTalks/index.html .
 
 # --- Step 6: Set up git ---
 echo "==> Creating .gitignore..."
@@ -91,11 +93,11 @@ cat > .gitignore << 'EOF'
 elm-stuff/
 dist.backup/
 dist/
-index.html
+main.js
 EOF
 
 echo "==> Adding files to git..."
-git add .gitignore elm.json src/Main.elm assets build.sh copy-Media-files.py
+git add .gitignore elm.json src/Main.elm assets build.sh copy-Media-files.py index.html
 
 # --- Done ---
 echo ""
