@@ -36,12 +36,7 @@ type alias SlideList msg = List (Slide msg)
 type RawSlide msg = RawSlide (Slide msg) | RawSlideGroup (List (Slide msg)) | RawExtraSlides (List (Slide msg))
 
 mkSlide : String -> List (Html msg) -> RawSlide msg
-mkSlide title body = RawSlide <|
-    { content = Html.div
-        [HtmlAttr.class "slide"]
-        (Html.h2 [] [Html.text title] :: body)
-    , slideType = FirstSlideInGroup
-    }
+mkSlide title body = RawSlide (mkSlideSimple title body)
 
 
 mkSlideSimple : String -> List (Html msg) -> Slide msg
