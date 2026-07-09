@@ -82,7 +82,7 @@ compressToLast s = case s of
     RawSlideGroup sls ->
         case List.reverse sls of
             [] -> s
-            (last :: _) -> RawSlide last
+            (last :: _) -> RawSlide { last | slideType = FirstSlideInGroup }
     RawExtraSlides sls ->
         case List.reverse sls of
             [] -> s
