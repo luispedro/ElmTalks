@@ -167,9 +167,9 @@ handleKeys =
                 then Json.Decode.succeed (GotoSlideNumber 40 0)
                 else if k == "9"
                 then Json.Decode.succeed (GotoSlideNumber 45 0)
-                else if k == "o"
+                else if k == "o" || k == "O"
                 then Json.Decode.succeed ToggleOverviewMode
-                else if k == "a"
+                else if k == "a" || k == "A"
                 then Json.Decode.succeed TogglePrintMode
                 else if k == "?"
                 then Json.Decode.succeed ToggleHelpMode
