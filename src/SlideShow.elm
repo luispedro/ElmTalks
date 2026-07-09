@@ -301,23 +301,14 @@ previous1 slides model =
     else 0
 
 getSlide : Int -> SlideList Msg -> Slide Msg
-getSlide n sl = case sl of
-    (h :: rest) ->
-        if n == 0
-        then h
-        else getSlide (n-1) rest
-    _ -> slideErr
+getSlide n sl =
+    getSlideMaybe n sl
+        |> Maybe.withDefault slideErr
 
 getSlideMaybe : Int -> SlideList Msg -> Maybe (Slide Msg)
 getSlideMaybe n sl =
-    if n < 0
-    then Nothing
-    else case sl of
-        [] -> Nothing
-        (h :: rest) ->
-            if n == 0
-            then Just h
-            else getSlideMaybe (n-1) rest
+    List.drop n sl
+        |> List.head
 
 view : SlideContent -> Model -> Browser.Document Msg
 view content model = case model.role of
