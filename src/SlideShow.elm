@@ -200,7 +200,7 @@ findIx slides ix =
         (f::rest) ->
             if f.slideType == FirstSlideInGroup
             then
-                if ix == 0
+                if ix <= 0
                 then 0
                 else 1 + (findIx rest (ix - 1))
             else 1 + findIx rest ix
